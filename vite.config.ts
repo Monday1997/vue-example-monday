@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
+import AutoImport from 'unplugin-auto-import/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -17,6 +18,17 @@ export default defineConfig({
         }),
       ],
     }),
+    AutoImport({
+      include: [
+        /\.vue$/,
+        /\.vue\.[tj]sx?\?vue/
+      ],
+      imports: [
+        'vue',
+        'vue-router',
+      ],
+      dts: true
+    })
   ],
   resolve: {
     alias: {

@@ -11,16 +11,15 @@
 
 <script setup lang="ts">
 import type { MenuProps } from 'ant-design-vue'
-import { ref } from 'vue'
-
-const selectedKeys = ref(['table-merge'])
-const items = ref([
+import { MenuRouteConfig } from './config.ts'
+const route = useRoute()
+const selectedKeys = ref([route.name])
+const items = [
   {
-    key: 'table-merge',
-    label: '合并表格',
-    title: 'Navigation One',
+    key: MenuRouteConfig.mergeTableRows1,
+    label: '合并表格1',
   },
-])
+]
 const handleClick: MenuProps['onClick'] = (menuInfo) => {
   console.log('click ', menuInfo)
 }
