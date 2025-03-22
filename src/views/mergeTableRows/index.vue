@@ -1,89 +1,74 @@
 <template>
   <div>
-    <a-table :columns="rows" :dataSource="list"></a-table>
+    <a-table bordered :columns="resultColumns" :dataSource="list"></a-table>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { ColumnProps } from 'ant-design-vue/es/table'
-const rows: Array<ColumnProps> = [
-  {
-    title: '套餐',
-    dataIndex: 'scheme',
-    width: 120,
-  },
-  {
-    title: '内存',
-    dataIndex: 'attr1',
-    width: 120,
-  },
-  {
-    title: '颜色',
-    dataIndex: 'attr2',
-    width: 120,
-  },
-  {
-    title: '进价',
-    dataIndex: 'price',
-    width: 120,
-  },
-  {
-    title: '售价',
-    dataIndex: 'price2',
-    width: 120,
-  },
-]
-type TItem = {
-  scheme: string
-  attr1: string
-  attr2: string
-  price: string
-  price2: string
+import type { TColumn } from './data'
+import { columns, list } from './config'
+
+const columnSpans = getSpansColumn(columns)
+const columnConfig = calculateRowSpans(columnSpans)
+const resultColumns = generateMergedColumns(columnConfig)
+console.log('🚀 ~ resultColumns:', resultColumns)
+
+//截取需要合并的项
+function getSpansColumn(sellColumns: ColumnProps[]): TColumn[] {
+  const spans: TColumn[] = []
+  for (let i = 0; i < sellColumns.length; i++) {
+    const key = sellColumns[i].dataIndex
+    spans.push(key as TColumn)
+    // if (key === 'attr3') {
+    //   return spans
+    // }
+  }
+  // 兜底
+  return spans
 }
-const list: TItem[] = [
-  {
-    scheme: '普通套餐',
-    attr1: '35G',
-    attr2: '天蓝色',
-    price: '1000',
-    price2: '2000',
-  },
-  {
-    scheme: '普通套餐',
-    attr1: '35G',
-    attr2: '鹦鹉绿',
-    price: '1000',
-    price2: '2000',
-  },
-  {
-    scheme: '普通套餐',
-    attr1: '35G',
-    attr2: '兰花紫',
-    price: '1000',
-    price2: '2000',
-  },
-  {
-    scheme: '耳机套餐',
-    attr1: '35G',
-    attr2: '天蓝色',
-    price: '1001',
-    price2: '2001',
-  },
-  {
-    scheme: '耳机套餐',
-    attr1: '35G',
-    attr2: '鹦鹉绿',
-    price: '1001',
-    price2: '2001',
-  },
-  {
-    scheme: '耳机套餐',
-    attr1: '35G',
-    attr2: '兰花紫',
-    price: '1001',
-    price2: '2001',
-  },
-]
+// 计算每一列需要的rowsSpans
+function calculateRowSpans(columnSpans: TColumn[]): Record<TColumn, number[]> {
+  const rows = list
+  // 收集跨行映射
+  const spanConfig: Record<string, number[]> = {}
+  const spansData = new Array(rows.length).fill(0)
+  //遍历到当前列为止的行值
+  const columnValues: string[] = new Array(rows.length).fill('')
+  columnSpans.forEach((columnSpan) => {
+    const spans: number[] = [...spansData]
+    columnValues[0] += rows[0][columnSpan] + '_'
+    let currentSpanStart = 0
+    for (let i = 0; i < rows.length; i++) {
+      if (i < rows.length - 1) {
+        columnValues[i + 1] += rows[i + 1][columnSpan] + '_'
+      }
+      // 遇到不同组或最后一行时结算跨度
+      if (i === rows.length - 1 || columnValues[i + 1] !== columnValues[i]) {
+        spans[currentSpanStart] = i - currentSpanStart + 1
+        for (let j = currentSpanStart + 1; j <= i; j++) {
+          spans[j] = 0
+        }
+        currentSpanStart = i + 1
+      }
+    }
+    spanConfig[columnSpan] = spans
+  })
+  return spanConfig
+}
+//生成带合并配置的列定义
+function generateMergedColumns(columnConfig: Record<TColumn, number[]>) {
+  return columns.map((column) => {
+    if (!columnConfig[column.dataIndex]) return column
+
+    return {
+      ...column,
+      customCell: (_, index: number) => ({
+        rowSpan: columnConfig[column.dataIndex][index],
+      }),
+    }
+  })
+}
 </script>
 
 <style scoped></style>

@@ -13,7 +13,7 @@
 import type { MenuProps } from 'ant-design-vue'
 import { MenuRouteConfig } from './config.ts'
 const route = useRoute()
-const selectedKeys = ref([route.name])
+const selectedKeys = ref([route.meta.menuName || route.name])
 const items = [
   {
     key: MenuRouteConfig.mergeTableRows1,
