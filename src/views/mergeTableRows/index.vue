@@ -20,9 +20,9 @@ function getSpansColumn(sellColumns: ColumnProps[]): TColumn[] {
   for (let i = 0; i < sellColumns.length; i++) {
     const key = sellColumns[i].dataIndex
     spans.push(key as TColumn)
-    // if (key === 'attr3') {
-    //   return spans
-    // }
+    if (key === 'attr3') {
+      return spans
+    }
   }
   // 兜底
   return spans
