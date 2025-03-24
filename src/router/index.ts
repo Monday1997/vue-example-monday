@@ -1,24 +1,43 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 import Layout from '@/Layout/index.vue'
-import { MenuRouteConfig } from '@/Layout/home-menu/config'
-type TMenuRouteRaw = RouteRecordRaw & {
+export type TMenuRouteRaw = RouteRecordRaw & {
+  name: string
   meta: {
-    title: string,
-    /** 映射的菜单name 默认使用路由name */
-    menuName?: string
+    title: string
+    [key: string]: unknown
   }
 }
 // 页面上的路由
-const pagesRoute: TMenuRouteRaw[] = [
+export const pagesRoute: TMenuRouteRaw[] = [
   {
-    path: 'merge-table-rows1',
-    component: () => import('@/views/mergeTableRows/index.vue'),
-    name: MenuRouteConfig.mergeTableRows1,
+    path: 'merge-table',
+    name: 'meregTable',
     meta: {
       title: '合并表格'
-    }
-  }
+    },
+    redirect: '/pages/merge-table/merge-table-array',
+    children: [
+      {
+        path: 'merge-table-array',
+        component: () => import('@/views/mergeTableRows/index.vue'),
+        name: 'mergeTableArray',
+        meta: {
+          title: '合并表格(数组)'
+        },
+      },
+      {
+        path: 'merge-table-tree',
+        component: () => import('@/views/mergeTableRows/mergeByTree.vue'),
+        name: 'mergeTableTree',
+        meta: {
+          title: '合并表格(树)'
+        },
+      }
+    ]
+  },
+
+
 ]
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
