@@ -17,99 +17,85 @@
     :pagination="false"
     bordered
     :columns="resultColumns"
-    :dataSource="rowsData"
-  ></a-table>
+    :dataSource="resultList"
+  >
+    <template #bodyCell="{ column, record }">
+      <template v-if="column.dataIndex === 'price'">
+        <a-input v-model:value="record.price"></a-input>
+      </template>
+    </template>
+  </a-table>
 </template>
 
 <script setup lang="ts">
-import type { SelectProps } from 'ant-design-vue'
 import type { ColumnProps } from 'ant-design-vue/es/table'
 import type { TColumn } from './data'
-import { columnsWithForm as columns } from './config'
-const spans = {
-  xs: 8,
-  sm: 8,
-  md: 6,
-  lg: 4,
-  xl: 4,
-  xxl: 4,
-}
+import {
+  columnsWithForm as columns,
+  selectOptions,
+  formGroup,
+  spans,
+} from './config'
+
 const form = reactive<Record<string, number[]>>({
   scheme: [11],
   attr1: [4, 5],
   attr2: [],
   attr3: [7, 9],
 })
-const formGroup = [
-  { label: '套餐', key: 'scheme' },
-  { label: '内存', key: 'attr1' },
-  { label: '颜色', key: 'attr2' },
-  { label: '运行内存', key: 'attr3' },
-]
-const selectOptions: Record<string, SelectProps['options']> = {
-  scheme: [
-    { label: '套餐一', value: 11 },
-    { label: '套餐二', value: 12 },
-  ],
-  attr1: [
-    { label: '32G', value: 4 },
-    { label: '64G', value: 5 },
-    { label: '128G', value: 6 },
-  ],
-  attr2: [
-    { label: '红色', value: 1 },
-    { label: '黄色', value: 2 },
-    { label: '绿色', value: 3 },
-  ],
-  attr3: [
-    { label: '32G', value: 7 },
-    { label: '64G', value: 8 },
-    { label: '128G', value: 9 },
-  ],
-}
-
-const formMap: Record<number, string> = {}
-const formData: Record<string, number[]> = {}
-const dynamicColumn = formGroup
-  .filter((item) => form[item.key].length > 0)
-  .map((item) => {
-    formData[item.key] = form[item.key]
-    return {
-      dataIndex: item.key,
-      title: item.label,
-    }
-  })
-
+// 设置form的value与label映射
+const formValueLabelMap: Record<number, string> = {}
 Object.keys(selectOptions).forEach((key: string) => {
   const valueList = selectOptions[key]
   valueList!.forEach((item) => {
-    formMap[item.value as number] = item.label
+    formValueLabelMap[item.value as number] = item.label
   })
 })
-const rowsData = permuteForm(formData)
 
-const columnSpans = getSpansColumn(dynamicColumn)
-debugger
-const columnConfig = calculateRowSpans(columnSpans, rowsData)
-const resultColumns = generateMergedColumns(columnConfig)
+let dynamicColumn: ColumnProps[] = []
+const resultColumns = ref<ColumnProps[]>([])
+const resultList = ref<Record<string, unknown>[]>([])
+
+watch(
+  () => form,
+  () => {
+    dynamicColumn = getDynamicColumn()
+    resultList.value = permuteForm(dynamicColumn)
+    resultColumns.value = getColumns()
+  },
+  {
+    deep: true,
+    immediate: true,
+  },
+)
+function getDynamicColumn(): ColumnProps[] {
+  return formGroup
+    .filter((item) => form[item.key].length > 0)
+    .map((item) => {
+      return {
+        dataIndex: item.key,
+        title: item.label,
+      }
+    })
+}
+function getColumns() {
+  const columnSpans = getSpansColumn(dynamicColumn)
+  const columnConfig = calculateRowSpans(columnSpans)
+  const column = generateMergedColumns(columnConfig)
+  return column
+}
 //截取需要合并的项
 function getSpansColumn(sellColumns: ColumnProps[]): TColumn[] {
   const spans: TColumn[] = []
   for (let i = 0; i < sellColumns.length; i++) {
     const key = sellColumns[i].dataIndex
     spans.push(key as TColumn)
-    if (key === 'attr3') {
-      return spans
-    }
   }
-  // 兜底
   return spans
 }
 // 计算每一列需要的rowsSpans
-function calculateRowSpans(
-  columnSpans: TColumn[],
-  rows: any[],
-): Record<TColumn, number[]> {
+function calculateRowSpans(columnSpans: TColumn[]): Record<TColumn, number[]> {
+  const rows = resultList.value
   // 收集跨行映射
   const spanConfig: Record<string, number[]> = {}
   const spansData = new Array(rows.length).fill(0)
@@ -136,46 +122,51 @@ function calculateRowSpans(
   })
   return spanConfig
 }
-//生成带合并配置的列定义
-function generateMergedColumns(columnConfig: Record<TColumn, number[]>) {
+/**
+ * 生成带合并配置的列定义
+ * @params columnConfig 合并行的列配置
+ */
+function generateMergedColumns(
+  columnConfig: Record<TColumn, number[]>,
+): ColumnProps[] {
   return dynamicColumn.concat(columns).map((column) => {
-    if (!columnConfig[column.dataIndex]) return column
-
+    if (!columnConfig[column.dataIndex as TColumn]) {
+      return column
+    }
     return {
       ...column,
       customCell: (_, index: number) => ({
-        rowSpan: columnConfig[column.dataIndex][index],
+        rowSpan: columnConfig[column.dataIndex as TColumn][index],
       }),
-    }
+    } as ColumnProps
   })
 }
 
-function permuteForm(form: {
-  [key: string]: number[]
-}): { [key: string]: number }[] {
-  const keys = Object.keys(form)
-  if (keys.length === 0) {
+/**
+ * 生成表格数据
+ * @parms dynamicColumn 需要合并的列
+ */
+function permuteForm(dynamicColumn: ColumnProps[]): Record<string, unknown>[] {
+  if (dynamicColumn.length === 0) {
     return []
   }
-
-  let result: string[][] = [[]]
+  const keys: string[] = dynamicColumn.map((item) => item.dataIndex as string)
+  let result: number[][] = [[]]
 
   for (const key of keys) {
     const values = form[key]
-    const newResult: string[][] = []
+    const newResult: number[][] = []
     for (const prevCombination of result) {
       for (const value of values) {
         newResult.push([...prevCombination, value])
       }
     }
     result = newResult
-    console.log('🚀 ~ result:', result)
   }
-  debugger
   return result.map((combination) => {
-    const obj: { [key: string]: string } = { price: 0, price2: 0 }
+    const obj: { [key: string]: unknown } = { price: 0, price2: 0 }
     keys.forEach((key, index) => {
-      obj[key] = formMap[combination[index]]
+      obj[key] = formValueLabelMap[combination[index]]
     })
     return obj
   })
