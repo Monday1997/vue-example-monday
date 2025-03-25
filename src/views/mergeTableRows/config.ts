@@ -1,4 +1,5 @@
 import type { TColumnProps, EItem } from './data'
+import type { SelectProps } from 'ant-design-vue'
 export const columns: Array<TColumnProps> = [
   {
     title: '套餐',
@@ -103,3 +104,42 @@ export const columnsWithForm: Array<TColumnProps> = [
     width: 120,
   },
 ]
+
+
+export const formGroup = [
+  { label: '套餐', key: 'scheme' },
+  { label: '内存', key: 'attr1' },
+  { label: '颜色', key: 'attr2' },
+  { label: '运行内存', key: 'attr3' },
+]
+
+export const selectOptions: Record<string, SelectProps['options']> = {
+  scheme: [
+    { label: '套餐一', value: 11 },
+    { label: '套餐二', value: 12 },
+  ],
+  attr1: [
+    { label: '32G', value: 4 },
+    { label: '64G', value: 5 },
+    { label: '128G', value: 6 },
+  ],
+  attr2: [
+    { label: '红色', value: 1 },
+    { label: '黄色', value: 2 },
+    { label: '绿色', value: 3 },
+  ],
+  attr3: [
+    { label: '32G', value: 7 },
+    { label: '64G', value: 8 },
+    { label: '128G', value: 9 },
+  ],
+}
+
+export const spans = {
+  xs: 8,
+  sm: 8,
+  md: 6,
+  lg: 4,
+  xl: 4,
+  xxl: 4,
+}
