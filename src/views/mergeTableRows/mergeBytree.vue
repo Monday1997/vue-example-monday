@@ -55,6 +55,7 @@ Object.keys(selectOptions).forEach((key: string) => {
 let dynamicColumn: ColumnProps[] = []
 const resultColumns = ref<ColumnProps[]>([])
 const resultList = ref<Record<string, unknown>[]>([])
+const colsTableMap: Record<string, Record<string, unknown>> = {}
 
 watch(
   () => form,
@@ -163,11 +164,25 @@ function permuteForm(dynamicColumn: ColumnProps[]): Record<string, unknown>[] {
     }
     result = newResult
   }
-  return result.map((combination) => {
+  let type: 'add' | 'del' | 'udpate' = 'add'
+  if (resultList.value.length === result.length) {
+    type = 'udpate'
+  }
+  return result.map((combination, index) => {
     const obj: { [key: string]: unknown } = { price: 0, price2: 0 }
-    keys.forEach((key, index) => {
-      obj[key] = formValueLabelMap[combination[index]]
+    const colsValue = combination.join('')
+    if (type === 'udpate') {
+      obj.price = resultList.value[index].price as number
+      obj.price2 = resultList.value[index].price2 as number
+    } else if (type === 'add') {
+      if (colsTableMap[colsValue]) {
+        return colsTableMap[colsValue]
+      }
+    }
+    keys.forEach((key, keyIndex) => {
+      obj[key] = formValueLabelMap[combination[keyIndex]]
     })
+    colsTableMap[colsValue] = obj
     return obj
   })
 }
