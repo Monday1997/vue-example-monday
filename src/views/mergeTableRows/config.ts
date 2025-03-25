@@ -90,3 +90,16 @@ export const list: Record<EItem, string>[] = [
     price2: '2001',
   },
 ]
+
+export const columnsWithForm: Array<TColumnProps> = [
+  {
+    title: '进价',
+    dataIndex: 'price',
+    width: 120,
+  },
+  {
+    title: '售价',
+    dataIndex: 'price2',
+    width: 120,
+  },
+]
