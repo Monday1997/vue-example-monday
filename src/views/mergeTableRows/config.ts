@@ -92,6 +92,7 @@ export const list: Record<EItem, string>[] = [
   },
 ]
 
+// 合并表格二
 export const columnsWithForm: Array<TColumnProps> = [
   {
     title: '进价',
@@ -104,7 +105,6 @@ export const columnsWithForm: Array<TColumnProps> = [
     width: 120,
   },
 ]
-
 
 export const formGroup = [
   { label: '套餐', key: 'scheme' },

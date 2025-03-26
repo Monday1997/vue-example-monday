@@ -61,7 +61,7 @@ watch(
   () => form,
   () => {
     dynamicColumn = getDynamicColumn()
-    resultList.value = permuteForm(dynamicColumn)
+    resultList.value = permuteForm()
     resultColumns.value = getColumns()
   },
   {
@@ -80,16 +80,16 @@ function getDynamicColumn(): ColumnProps[] {
     })
 }
 function getColumns() {
-  const columnSpans = getSpansColumn(dynamicColumn)
+  const columnSpans = getSpansColumn()
   const columnConfig = calculateRowSpans(columnSpans)
   const column = generateMergedColumns(columnConfig)
   return column
 }
 //截取需要合并的项
-function getSpansColumn(sellColumns: ColumnProps[]): TColumn[] {
+function getSpansColumn(): TColumn[] {
   const spans: TColumn[] = []
-  for (let i = 0; i < sellColumns.length; i++) {
-    const key = sellColumns[i].dataIndex
+  for (let i = 0; i < dynamicColumn.length; i++) {
+    const key = dynamicColumn[i].dataIndex
     spans.push(key as TColumn)
   }
   return spans
@@ -145,9 +145,8 @@ function generateMergedColumns(
 
 /**
  * 生成表格数据
- * @parms dynamicColumn 需要合并的列
  */
-function permuteForm(dynamicColumn: ColumnProps[]): Record<string, unknown>[] {
+function permuteForm(): Record<string, unknown>[] {
   if (dynamicColumn.length === 0) {
     return []
   }
