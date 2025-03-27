@@ -33,6 +33,14 @@ export const pagesRoute: TMenuRouteRaw[] = [
         meta: {
           title: '合并表格(树)'
         },
+      },
+      {
+        path: 'merge-table-form-optimize',
+        component: () => import('@/views/mergeTableRows/mergeByTreeOptimize.vue'),
+        name: 'merge-table-form-optimize',
+        meta: {
+          title: '合并表格(form优化)'
+        },
       }
     ]
   },
