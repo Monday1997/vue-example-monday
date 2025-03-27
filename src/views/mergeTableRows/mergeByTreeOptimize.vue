@@ -38,10 +38,10 @@ import {
 } from './config'
 
 const form = reactive<Record<string, number[]>>({
-  scheme: [],
-  attr1: [],
+  scheme: [11],
+  attr1: [4, 5],
   attr2: [],
-  attr3: [],
+  attr3: [7, 9],
 })
 let oldForm = JSON.parse(JSON.stringify(form))
 // 设置form的value与label映射
@@ -62,19 +62,62 @@ watch(
   () => form,
   () => {
     dynamicColumn = getDynamicColumn()
-    const listByForm = permuteForm()
-    resultList.value = listByForm.list
-    updateColumns(listByForm.type)
-    oldForm = JSON.parse(JSON.stringify(form))
+    const handlerColumnArgs = updateList()
+    updateColumns(handlerColumnArgs)
+    // const listByForm = permuteForm()
+    // resultList.value = listByForm.list
+    // updateColumns(listByForm.type)
+    // oldForm = JSON.parse(JSON.stringify(form))
   },
   {
     deep: true,
   },
 )
+function updateList(): {
+  handlerType: 'addColumn' | 'delColumn' | 'update'
+  key?: string
+  index?: number
+} {
+  if (dynamicColumn.length === 0) {
+    resultList.value = []
+  }
+  if (resultList.value.length === 0) {
+    init()
+  } else {
+    let dynamicIndex = 0
+    for (let i = 0; i < formGroup.length; i++) {
+      const { key } = formGroup[i]
+      const oldLength = oldForm[key].length
+      if (oldLength > 0) {
+        dynamicIndex++
+      }
+      if (form[key].length + oldLength === 1) {
+        resultList.value = resultList.value.map((item) => {
+          if (oldForm[key].length === 0) {
+            item[key] = formValueLabelMap[form[key][0]]
+          } else {
+            delete item[key]
+          }
+          return item
+        })
+        const handlerType = oldLength === 0 ? 'addColumn' : 'delColumn'
+        updateOldForms()
+        return {
+          handlerType,
+          key,
+          index: dynamicIndex,
+        }
+      }
+    }
+  }
+  return { handlerType: 'update' }
+}
+function updateOldForms() {
+  oldForm = JSON.parse(JSON.stringify(form))
+}
 function init() {
   dynamicColumn = getDynamicColumn()
-  const listByForm = permuteForm()
-  resultList.value = listByForm.list
+  resultList.value = permuteForm()
   resultColumns.value = getColumns()
 }
 init()
@@ -156,15 +199,9 @@ function generateMergedColumns(
 /**
  * 生成表格数据
  */
-function permuteForm(): {
-  type: 'add' | 'del' | 'update'
-  list: Record<string, unknown>[]
-} {
+function permuteForm(): Record<string, unknown>[] {
   if (dynamicColumn.length === 0) {
-    return {
-      type: 'add',
-      list: [],
-    }
+    return []
   }
   const keys: string[] = dynamicColumn.map((item) => item.dataIndex as string)
   let result: number[][] = [[]]
@@ -179,64 +216,57 @@ function permuteForm(): {
     }
     result = newResult
   }
-  let type: 'add' | 'del' | 'update' = 'add'
-  if (resultList.value.length === result.length) {
-    type = 'update'
-  }
-  const colsTableMapCpoy = colsTableMap
+  // let type: 'add' | 'del' | 'update' = 'add'
+  // if (resultList.value.length === result.length) {
+  //   type = 'update'
+  // }
+  // const colsTableMapCpoy = colsTableMap
   colsTableMap = {}
-  const list = result.map((combination, index) => {
+  const list = result.map((combination) => {
     const obj: { [key: string]: unknown } = { price: 0, price2: 0 }
     const colsValue = combination.join('')
-    if (type === 'update') {
-      obj.price = resultList.value[index].price as number
-      obj.price2 = resultList.value[index].price2 as number
-    } else if (type === 'add') {
-      if (colsTableMapCpoy[colsValue]) {
-        colsTableMap[colsValue] = colsTableMapCpoy[colsValue]
-        return colsTableMap[colsValue]
-      }
-    }
+    // if (type === 'update') {
+    //   obj.price = resultList.value[index].price as number
+    //   obj.price2 = resultList.value[index].price2 as number
+    // } else if (type === 'add') {
+    //   if (colsTableMapCpoy[colsValue]) {
+    //     colsTableMap[colsValue] = colsTableMapCpoy[colsValue]
+    //     return colsTableMap[colsValue]
+    //   }
+    // }
     keys.forEach((key, keyIndex) => {
       obj[key] = formValueLabelMap[combination[keyIndex]]
     })
     colsTableMap[colsValue] = obj
     return obj
   })
-  return { type, list }
+  return list
 }
 
-function updateColumns(type: 'add' | 'update') {
-  if (type === 'update') {
-    // 当前form在哪一列新增
-    const dynamicIndex = 0
-    for (let i = 0; i < formGroup.length; i++) {
-      const key = formGroup[i].key
-      const oldLength = oldForm[key].length
-      const newLength = form[key].length
-      // oldLength > 0 && dynamicIndex++
-      if (newLength > oldLength) {
-        const customCell =
-          i > 0
-            ? resultColumns.value[i - 1].customCell
-            : (_, index?: number) => ({
-                rowSpan: index! > 0 ? 0 : resultList.value.length,
-              })
-        // @ts-expect-error 忽略一下报错
-        resultColumns.value.splice(dynamicIndex, 0, {
-          dataIndex: key,
-          title: formGroup[i].label,
-          customCell,
-        })
-        break
-      } else if (newLength < oldLength) {
-        // 减一列
-        resultColumns.value.splice(dynamicIndex, 1)
-        break
-      }
-    }
-  } else {
-    resultColumns.value = getColumns()
+function updateColumns({
+  handlerType,
+  key: handlerKey,
+  index: handlerIndex,
+}: {
+  handlerType: 'addColumn' | 'delColumn' | 'update'
+  key?: string
+  index?: number
+}) {
+  if (handlerType === 'addColumn' && typeof handlerIndex === 'number') {
+    const customCell =
+      handlerIndex > 0
+        ? resultColumns.value[handlerIndex - 1].customCell
+        : (_, index?: number) => ({
+            rowSpan: index! > 0 ? 0 : resultList.value.length,
+          })
+    // @ts-expect-error 忽略一下报错
+    resultColumns.value.splice(handlerIndex, 0, {
+      dataIndex: handlerKey,
+      title: formGroup[handlerIndex].label,
+      customCell,
+    })
+  } else if (handlerType === 'delColumn') {
+    resultColumns.value.splice(handlerIndex! - 1, 1)
   }
 }
 </script>
