@@ -1,3 +1,4 @@
+import { TableColumnType } from 'ant-design-vue'
 export enum EItem {
   scheme = 'scheme',
   attr1 = 'attr1',
@@ -7,6 +8,5 @@ export enum EItem {
   price2 = 'price2',
 }
 export type TColumn = `${EItem}`
-export type TColumnProps = Omit<ColumnProps, 'dataIndex'> & {
-  dataIndex: TColumn
-}
+export type TColumnProps = TableColumnType[]
+

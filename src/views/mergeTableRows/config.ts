@@ -93,7 +93,7 @@ export const list: Record<EItem, string>[] = [
 ]
 
 // 合并表格二
-export const columnsWithForm: Array<TColumnProps> = [
+export const columnsWithForm: TColumnProps = [
   {
     title: '进价',
     dataIndex: 'price',
