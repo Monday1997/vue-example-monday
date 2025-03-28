@@ -65,20 +65,24 @@ watch(
   () => {
     dynamicColumn = getDynamicColumn()
     const handlerColumnArgs = updateList()
-    updateColumns(handlerColumnArgs)
+    if (handlerColumnArgs) {
+      updateColumns(handlerColumnArgs)
+    }
   },
   {
     deep: true,
   },
 )
-/**
- * 处理行并返回对应的列操作参数
- */
-function updateList(): {
+/** 更新列时的必要参数 */
+type TColumnUPdateArg = {
   handlerType: 'addColumn' | 'delColumn' | 'ListUpdate' | 'update'
   key?: EItem
   index?: number
-} {
+}
+/**
+ * 处理行并返回对应的列操作参数
+ */
+function updateList(): TColumnUPdateArg | void {
   if (dynamicColumn.length === 0) {
     resultList.value = []
   }
@@ -94,82 +98,110 @@ function updateList(): {
         dynamicIndex++
       }
       if (newLength + oldLength === 1) {
-        resultList.value = resultList.value.map((item) => {
-          if (oldForm[key].length === 0) {
-            item[key] = formValueLabelMap[form[key][0]]
-          } else {
-            delete item[key]
-          }
-          return item
-        })
-        const handlerType = oldLength === 0 ? 'addColumn' : 'delColumn'
-        updateOldForms()
-        return {
-          handlerType,
-          key,
-          index: dynamicIndex,
-        }
+        return onlyColumnUpdate(key, oldLength, dynamicIndex)
       } else if (oldLength !== newLength) {
-        // debugger
-        if (oldLength > newLength) {
-          const delValue = findDelValue(oldForm[key], form[key])
-          // 减
-          resultList.value = resultList.value.filter((item) => {
-            return item[key] !== formValueLabelMap[delValue]
-          })
-          updateOldForms()
-          return {
-            handlerType: 'ListUpdate',
-            key,
-            index: dynamicIndex,
-          }
-        } else {
-          // 加
-          // 基于前一个去添加
-          const newArr = resultList.value
-          let offSet = 0,
-            count = 0
-          resultList.value.forEach((item, index) => {
-            if (item[key] === formValueLabelMap[form[key][newLength - 2]]) {
-              count++
-            } else if (count > 0) {
-              const insertOption = resultList.value.slice(index, index + count)
-              insertOption.forEach((insertItem) => {
-                // 最好deepclone
-                newArr.splice(index + offSet, 0, {
-                  ...insertItem,
-                  price: 0,
-                  price2: 0,
-                  [key]: formValueLabelMap[form[key][newLength - 1]],
-                })
-                offSet++
-              })
-              count = 0
-            }
-          })
-          if (count > 0) {
-            const insertOption = [...newArr.slice(-count)]
-            insertOption.map((item) => {
-              newArr.push({
-                ...item,
-                price: 0,
-                price2: 0,
-                [key]: formValueLabelMap[form[key][newLength - 1]],
-              })
-            })
-          }
-          resultList.value = newArr
-          updateOldForms()
-          return {
-            handlerType: 'ListUpdate',
-            key,
-            index: dynamicIndex,
-          }
-        }
+        return oldLength > newLength
+          ? delARow(key, dynamicIndex)
+          : addSomeRow(key, newLength, dynamicIndex)
       }
     }
+    // 兜底
+    return { handlerType: 'update' }
   }
-  return { handlerType: 'update' }
+
+  /**
+   * 找到被影响的列信息，同时修改行
+   * @param key 影响到的key
+   * @param oldLength 修改前from长度
+   * @param dynamicIndex 影响到的列索引
+   */
+  function onlyColumnUpdate(
+    key: EItem,
+    oldLength: number,
+    dynamicIndex: number,
+  ): TColumnUPdateArg {
+    resultList.value = resultList.value.map((item) => {
+      if (oldForm[key].length === 0) {
+        item[key] = formValueLabelMap[form[key][0]]
+      } else {
+        delete item[key]
+      }
+      return item
+    })
+    const handlerType = oldLength === 0 ? 'addColumn' : 'delColumn'
+    updateOldForms()
+    return {
+      handlerType,
+      key,
+      index: dynamicIndex,
+    }
+  }
+  /**
+   * 删除一行
+   */
+  function delARow(key: EItem, dynamicIndex: number): TColumnUPdateArg {
+    const delValue = findDelValue(oldForm[key], form[key])
+    resultList.value = resultList.value.filter((item) => {
+      return item[key] !== formValueLabelMap[delValue]
+    })
+    updateOldForms()
+    return {
+      handlerType: 'ListUpdate',
+      key,
+      index: dynamicIndex,
+    }
+  }
+  /**
+   * form改变导致添加多行
+   * @param key 影响到的key
+   * @param newLength 修改后from长度
+   * @param dynamicIndex 影响到的列索引
+   */
+  function addSomeRow(
+    key: EItem,
+    newLength: number,
+    dynamicIndex: number,
+  ): TColumnUPdateArg {
+    const newArr = resultList.value
+    let offSet = 0,
+      count = 0
+    resultList.value.forEach((item, index) => {
+      if (item[key] === formValueLabelMap[form[key][newLength - 2]]) {
+        count++
+      } else if (count > 0) {
+        const insertOption = resultList.value.slice(index, index + count)
+        insertOption.forEach((insertItem) => {
+          // 最好deepclone
+          newArr.splice(index + offSet, 0, {
+            ...insertItem,
+            price: 0,
+            price2: 0,
+            [key]: formValueLabelMap[form[key][newLength - 1]],
+          })
+          offSet++
+        })
+        count = 0
+      }
+    })
+    if (count > 0) {
+      const insertOption = [...newArr.slice(-count)]
+      insertOption.map((item) => {
+        newArr.push({
+          ...item,
+          price: 0,
+          price2: 0,
+          [key]: formValueLabelMap[form[key][newLength - 1]],
+        })
+      })
+    }
+    resultList.value = newArr
+    updateOldForms()
+    return {
+      handlerType: 'ListUpdate',
+      key,
+      index: dynamicIndex,
+    }
+  }
 }
 // list1长 list2短
 function findDelValue(list1: number[], list2: number[]) {
@@ -290,24 +322,10 @@ function permuteForm(): Record<string, unknown>[] {
     }
     result = newResult
   }
-  // let type: 'add' | 'del' | 'update' = 'add'
-  // if (resultList.value.length === result.length) {
-  //   type = 'update'
-  // }
-  // const colsTableMapCpoy = colsTableMap
   colsTableMap = {}
   const list = result.map((combination) => {
     const obj: { [key: string]: unknown } = { price: 0, price2: 0 }
     const colsValue = combination.join('')
-    // if (type === 'update') {
-    //   obj.price = resultList.value[index].price as number
-    //   obj.price2 = resultList.value[index].price2 as number
-    // } else if (type === 'add') {
-    //   if (colsTableMapCpoy[colsValue]) {
-    //     colsTableMap[colsValue] = colsTableMapCpoy[colsValue]
-    //     return colsTableMap[colsValue]
-    //   }
-    // }
     keys.forEach((key, keyIndex) => {
       obj[key] = formValueLabelMap[combination[keyIndex]]
     })
