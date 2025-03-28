@@ -29,7 +29,8 @@
 
 <script setup lang="ts">
 import type { ColumnProps } from 'ant-design-vue/es/table'
-import type { TColumn } from './data'
+import { EItem } from './data'
+import type { TColumn, TColumnProps } from './data'
 import {
   columnsWithForm as columns,
   selectOptions,
@@ -37,22 +38,23 @@ import {
   spans,
 } from './config'
 
-const form = reactive<Record<string, number[]>>({
-  scheme: [11],
-  attr1: [4, 5],
-  attr2: [],
-  attr3: [7, 9],
+const form = reactive<Partial<Record<EItem, number[]>>>({
+  [EItem.scheme]: [11],
+  [EItem.attr1]: [4, 5],
+  [EItem.attr2]: [],
+  [EItem.attr3]: [7, 9],
 })
 // 设置form的value与label映射
 const formValueLabelMap: Record<number, string> = {}
-Object.keys(selectOptions).forEach((key: string) => {
+const selecKeys = Object.keys(selectOptions) as EItem[]
+selecKeys.forEach((key: EItem) => {
   const valueList = selectOptions[key]
   valueList!.forEach((item) => {
     formValueLabelMap[item.value as number] = item.label
   })
 })
 
-let dynamicColumn: ColumnProps[] = []
+let dynamicColumn: TColumnProps = []
 const resultColumns = ref<ColumnProps[]>([])
 const resultList = ref<Record<string, unknown>[]>([])
 let colsTableMap: Record<string, Record<string, unknown>> = {}
@@ -69,15 +71,15 @@ watch(
     immediate: true,
   },
 )
-function getDynamicColumn(): ColumnProps[] {
+function getDynamicColumn(): TColumnProps {
   return formGroup
-    .filter((item) => form[item.key].length > 0)
+    .filter((item) => form[item.key]!.length > 0)
     .map((item) => {
       return {
         dataIndex: item.key,
         title: item.label,
       }
-    })
+    }) as TColumnProps
 }
 function getColumns() {
   const columnSpans = getSpansColumn()
@@ -150,14 +152,14 @@ function permuteForm(): Record<string, unknown>[] {
   if (dynamicColumn.length === 0) {
     return []
   }
-  const keys: string[] = dynamicColumn.map((item) => item.dataIndex as string)
+  const keys: EItem[] = dynamicColumn.map((item) => item.dataIndex as EItem)
   let result: number[][] = [[]]
 
   for (const key of keys) {
     const values = form[key]
     const newResult: number[][] = []
     for (const prevCombination of result) {
-      for (const value of values) {
+      for (const value of values!) {
         newResult.push([...prevCombination, value])
       }
     }

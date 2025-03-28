@@ -1,24 +1,25 @@
-import type { TColumnProps, EItem } from './data'
+import type { TColumnProps, } from './data'
 import type { SelectProps } from 'ant-design-vue'
-export const columns: Array<TColumnProps> = [
+import { EItem, TColumn } from './data'
+export const columns: TColumnProps = [
   {
     title: '套餐',
-    dataIndex: 'scheme',
+    dataIndex: EItem.scheme,
     width: 120,
   },
   {
     title: '内存',
-    dataIndex: 'attr1',
+    dataIndex: EItem.attr1,
     width: 120,
   },
   {
     title: '颜色',
-    dataIndex: 'attr2',
+    dataIndex: EItem.attr2,
     width: 120,
   },
   {
     title: '运行内存',
-    dataIndex: 'attr3',
+    dataIndex: EItem.attr3,
     width: 120,
   },
   {
@@ -33,7 +34,7 @@ export const columns: Array<TColumnProps> = [
   },
 ]
 
-export const list: Record<EItem, string>[] = [
+export const list: Record<TColumn, string>[] = [
   {
     scheme: '普通套餐',
     attr1: '35G',
@@ -106,29 +107,29 @@ export const columnsWithForm: TColumnProps = [
   },
 ]
 
-export const formGroup = [
-  { label: '套餐', key: 'scheme' },
-  { label: '内存', key: 'attr1' },
-  { label: '颜色', key: 'attr2' },
-  { label: '运行内存', key: 'attr3' },
+export const formGroup: { label: string, key: EItem }[] = [
+  { label: '套餐', key: EItem.scheme },
+  { label: '内存', key: EItem.attr1 },
+  { label: '颜色', key: EItem.attr2 },
+  { label: '运行内存', key: EItem.attr3 },
 ]
 
-export const selectOptions: Record<string, SelectProps['options']> = {
-  scheme: [
+export const selectOptions: Partial<Record<EItem, { label: string, value: number }[]>> = {
+  [EItem.scheme]: [
     { label: '套餐一', value: 11 },
     { label: '套餐二', value: 12 },
   ],
-  attr1: [
+  [EItem.attr1]: [
     { label: '32G', value: 4 },
     { label: '64G', value: 5 },
     { label: '128G', value: 6 },
   ],
-  attr2: [
+  [EItem.attr2]: [
     { label: '红色', value: 1 },
     { label: '黄色', value: 2 },
     { label: '绿色', value: 3 },
   ],
-  attr3: [
+  [EItem.attr3]: [
     { label: '32G', value: 7 },
     { label: '64G', value: 8 },
     { label: '128G', value: 9 },

@@ -4,9 +4,7 @@ export enum EItem {
   attr1 = 'attr1',
   attr2 = 'attr2',
   attr3 = 'attr3',
-  price = 'price',
-  price2 = 'price2',
 }
-export type TColumn = `${EItem}`
-export type TColumnProps = TableColumnType[]
+export type TColumn = EItem | 'price' | 'price2'
+export type TColumnProps = (Omit<TableColumnType, 'dataIndex'> & { dataIndex: EItem | 'price' | 'price2' })[]
 
