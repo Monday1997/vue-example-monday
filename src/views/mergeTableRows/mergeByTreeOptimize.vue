@@ -15,6 +15,7 @@
   <a-table
     :scroll="{ y: 500 }"
     :pagination="false"
+    class="ant-table-striped"
     bordered
     :columns="resultColumns"
     :dataSource="resultList"
@@ -73,8 +74,11 @@ watch(
     deep: true,
   },
 )
+/**
+ * 处理行并返回对应的列操作参数
+ */
 function updateList(): {
-  handlerType: 'addColumn' | 'delColumn' | 'update'
+  handlerType: 'addColumn' | 'delColumn' | 'ListUpdate' | 'update'
   key?: string
   index?: number
 } {
@@ -88,10 +92,11 @@ function updateList(): {
     for (let i = 0; i < formGroup.length; i++) {
       const { key } = formGroup[i]
       const oldLength = oldForm[key].length
+      const newLength = form[key].length
       if (oldLength > 0) {
         dynamicIndex++
       }
-      if (form[key].length + oldLength === 1) {
+      if (newLength + oldLength === 1) {
         resultList.value = resultList.value.map((item) => {
           if (oldForm[key].length === 0) {
             item[key] = formValueLabelMap[form[key][0]]
@@ -107,10 +112,81 @@ function updateList(): {
           key,
           index: dynamicIndex,
         }
+      } else if (oldLength !== newLength) {
+        // debugger
+        if (oldLength > newLength) {
+          const delValue = findDelValue(oldForm[key], form[key])
+          // 减
+          resultList.value = resultList.value.filter((item) => {
+            return item[key] !== formValueLabelMap[delValue]
+          })
+          updateOldForms()
+          return {
+            handlerType: 'ListUpdate',
+            key,
+            index: dynamicIndex,
+          }
+        } else {
+          // 加
+          // 基于前一个去添加
+          const newArr = resultList.value
+          let offSet = 0,
+            count = 0
+          resultList.value.forEach((item, index) => {
+            if (item[key] === formValueLabelMap[form[key][newLength - 2]]) {
+              count++
+            } else if (count > 0) {
+              const insertOption = resultList.value.slice(index, index + count)
+              insertOption.forEach((insertItem) => {
+                // 最好deepclone
+                newArr.splice(index + offSet, 0, {
+                  ...insertItem,
+                  price: 0,
+                  price2: 0,
+                  [key]: formValueLabelMap[form[key][newLength - 1]],
+                })
+                offSet++
+              })
+              count = 0
+            }
+          })
+          if (count > 0) {
+            const insertOption = [...newArr.slice(-count)]
+            insertOption.map((item) => {
+              newArr.push({
+                ...item,
+                price: 0,
+                price2: 0,
+                [key]: formValueLabelMap[form[key][newLength - 1]],
+              })
+            })
+          }
+          resultList.value = newArr
+          updateOldForms()
+          return {
+            handlerType: 'ListUpdate',
+            key,
+            index: dynamicIndex,
+          }
+        }
       }
     }
   }
   return { handlerType: 'update' }
+}
+// list1长 list2短
+function findDelValue(list1: number[], list2: number[]) {
+  let l = 0,
+    r = 0
+  while (l < list1.length && r < list2.length) {
+    if (list1[l] === list2[r]) {
+      l++
+      r++
+    } else {
+      return list1[l]
+    }
+  }
+  return list1[l]
 }
 function updateOldForms() {
   oldForm = JSON.parse(JSON.stringify(form))
@@ -123,14 +199,15 @@ function init() {
 init()
 
 function getDynamicColumn(): TColumnProps {
-  return formGroup
-    .filter((item) => form[item.key].length > 0)
-    .map((item) => {
-      return {
-        dataIndex: item.key,
-        title: item.label,
-      }
-    })
+  return formGroup.reduce((pre: TColumnProps, cur) => {
+    if (form[cur.key].length > 0) {
+      pre.push({
+        dataIndex: cur.key,
+        title: cur.label,
+      })
+    }
+    return pre
+  }, [])
 }
 function getColumns() {
   const columnSpans = getSpansColumn()
@@ -248,7 +325,7 @@ function updateColumns({
   key: handlerKey,
   index: handlerIndex,
 }: {
-  handlerType: 'addColumn' | 'delColumn' | 'update'
+  handlerType: 'addColumn' | 'delColumn' | 'ListUpdate' | 'update'
   key?: string
   index?: number
 }) {
@@ -267,8 +344,30 @@ function updateColumns({
     })
   } else if (handlerType === 'delColumn') {
     resultColumns.value.splice(handlerIndex! - 1, 1)
+  } else {
+    resultColumns.value = getColumns()
   }
 }
 </script>
 
-<style scoped></style>
+<style scoped lang="less">
+:deep(thead) {
+  .ant-table-cell {
+    height: 50px;
+    padding: 5px 10px;
+  }
+}
+
+:deep(tbody) {
+  .ant-table-cell {
+    height: 50px;
+    padding: 0 16px !important;
+  }
+}
+
+:deep(.ant-table-placeholder) {
+  .ant-table-cell {
+    padding: 16px;
+  }
+}
+</style>
