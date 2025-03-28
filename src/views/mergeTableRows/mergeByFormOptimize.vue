@@ -65,10 +65,6 @@ watch(
     dynamicColumn = getDynamicColumn()
     const handlerColumnArgs = updateList()
     updateColumns(handlerColumnArgs)
-    // const listByForm = permuteForm()
-    // resultList.value = listByForm.list
-    // updateColumns(listByForm.type)
-    // oldForm = JSON.parse(JSON.stringify(form))
   },
   {
     deep: true,
