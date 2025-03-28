@@ -162,7 +162,7 @@ function updateList(): TColumnUPdateArg | void {
     newLength: number,
     dynamicIndex: number,
   ): TColumnUPdateArg {
-    const newArr = resultList.value
+    const newArr = [...resultList.value]
     let offSet = 0,
       count = 0
     resultList.value.forEach((item, index) => {
