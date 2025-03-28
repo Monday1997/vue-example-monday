@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import type { TColumn, TColumnProps } from './data'
-import type { TableColumnType } from 'ant-design-vue'
+import { EItem } from './data'
 import {
   columnsWithForm as columns,
   selectOptions,
@@ -47,7 +47,8 @@ const form = reactive<Record<string, number[]>>({
 let oldForm = JSON.parse(JSON.stringify(form))
 // 设置form的value与label映射
 const formValueLabelMap: Record<number, string> = {}
-Object.keys(selectOptions).forEach((key: string) => {
+const selectionKeys = Object.keys(selectOptions) as EItem[]
+selectionKeys.forEach((key: EItem) => {
   const valueList = selectOptions[key]
   valueList!.forEach((item) => {
     formValueLabelMap[item.value as number] = item.label
@@ -75,7 +76,7 @@ watch(
  */
 function updateList(): {
   handlerType: 'addColumn' | 'delColumn' | 'ListUpdate' | 'update'
-  key?: string
+  key?: EItem
   index?: number
 } {
   if (dynamicColumn.length === 0) {
@@ -255,7 +256,7 @@ function calculateRowSpans(columnSpans: TColumn[]): Record<TColumn, number[]> {
  */
 function generateMergedColumns(
   columnConfig: Record<TColumn, number[]>,
-): TableColumnType[] {
+): TColumnProps {
   return dynamicColumn.concat(columns).map((column) => {
     if (!columnConfig[column.dataIndex as TColumn]) {
       return column
@@ -265,8 +266,8 @@ function generateMergedColumns(
       customCell: (_, index: number) => ({
         rowSpan: columnConfig[column.dataIndex as TColumn][index],
       }),
-    } as TableColumnType
-  })
+    }
+  }) as TColumnProps
 }
 
 /**
@@ -322,7 +323,7 @@ function updateColumns({
   index: handlerIndex,
 }: {
   handlerType: 'addColumn' | 'delColumn' | 'ListUpdate' | 'update'
-  key?: string
+  key?: EItem
   index?: number
 }) {
   if (handlerType === 'addColumn' && typeof handlerIndex === 'number') {
@@ -334,7 +335,7 @@ function updateColumns({
           })
     // @ts-expect-error 忽略一下报错
     resultColumns.value.splice(handlerIndex, 0, {
-      dataIndex: handlerKey,
+      dataIndex: handlerKey!,
       title: formGroup[handlerIndex].label,
       customCell,
     })

@@ -6,21 +6,20 @@
 
 <script setup lang="ts">
 import type { ColumnProps } from 'ant-design-vue/es/table'
-import type { TColumn } from './data'
 import { columns, list } from './config'
-
+import { EItem } from './data'
 const columnSpans = getSpansColumn(columns)
 const columnConfig = calculateRowSpans(columnSpans)
 const resultColumns = generateMergedColumns(columnConfig)
 console.log('🚀 ~ resultColumns:', resultColumns)
 
 //截取需要合并的项
-function getSpansColumn(sellColumns: ColumnProps[]): TColumn[] {
-  const spans: TColumn[] = []
+function getSpansColumn(sellColumns: ColumnProps[]): EItem[] {
+  const spans: EItem[] = []
   for (let i = 0; i < sellColumns.length; i++) {
     const key = sellColumns[i].dataIndex
-    spans.push(key as TColumn)
-    if (key === 'attr3') {
+    spans.push(key as EItem)
+    if (key === EItem.attr3) {
       return spans
     }
   }
@@ -28,7 +27,7 @@ function getSpansColumn(sellColumns: ColumnProps[]): TColumn[] {
   return spans
 }
 // 计算每一列需要的rowsSpans
-function calculateRowSpans(columnSpans: TColumn[]): Record<TColumn, number[]> {
+function calculateRowSpans(columnSpans: EItem[]): Record<EItem, number[]> {
   const rows = list
   // 收集跨行映射
   const spanConfig: Record<string, number[]> = {}
@@ -57,14 +56,14 @@ function calculateRowSpans(columnSpans: TColumn[]): Record<TColumn, number[]> {
   return spanConfig
 }
 //生成带合并配置的列定义
-function generateMergedColumns(columnConfig: Record<TColumn, number[]>) {
+function generateMergedColumns(columnConfig: Record<EItem, number[]>) {
   return columns.map((column) => {
-    if (!columnConfig[column.dataIndex]) return column
+    if (!columnConfig[column.dataIndex as EItem]) return column
 
     return {
       ...column,
       customCell: (_, index: number) => ({
-        rowSpan: columnConfig[column.dataIndex][index],
+        rowSpan: columnConfig[column.dataIndex as EItem][index],
       }),
     }
   })
