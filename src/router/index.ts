@@ -23,23 +23,23 @@ export const pagesRoute: TMenuRouteRaw[] = [
         component: () => import('@/views/mergeTableRows/index.vue'),
         name: 'mergeTableArray',
         meta: {
-          title: '合并表格(数组)'
+          title: '合并表格'
         },
       },
       {
-        path: 'merge-table-tree',
-        component: () => import('@/views/mergeTableRows/mergeByTree.vue'),
-        name: 'mergeTableTree',
+        path: 'merge-table-by-form',
+        component: () => import('@/views/mergeTableRows/mergeByForm.vue'),
+        name: 'mergeTableByForm',
         meta: {
-          title: '合并表格(树)'
+          title: '合并表格(表单)'
         },
       },
       {
         path: 'merge-table-form-optimize',
-        component: () => import('@/views/mergeTableRows/mergeByTreeOptimize.vue'),
+        component: () => import('@/views/mergeTableRows/mergeByFormOptimize.vue'),
         name: 'merge-table-form-optimize',
         meta: {
-          title: '合并表格(form优化)'
+          title: '合并表格(表单升级)'
         },
       }
     ]
