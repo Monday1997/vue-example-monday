@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import type { ColumnProps } from 'ant-design-vue/es/table'
-import { EItem } from './data'
+import { EItem } from './config'
 import type { TColumn, TColumnProps } from './data'
 import {
   columnsWithForm as columns,

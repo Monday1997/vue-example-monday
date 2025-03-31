@@ -1,6 +1,10 @@
-import type { TColumnProps, } from './data'
-import type { SelectProps } from 'ant-design-vue'
-import { EItem, TColumn } from './data'
+import type { TColumnProps, TColumn } from './data'
+export enum EItem {
+  scheme = 'scheme',
+  attr1 = 'attr1',
+  attr2 = 'attr2',
+  attr3 = 'attr3',
+}
 export const columns: TColumnProps = [
   {
     title: '套餐',

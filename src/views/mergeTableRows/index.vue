@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import type { ColumnProps } from 'ant-design-vue/es/table'
 import { columns, list } from './config'
-import { EItem } from './data'
+import { EItem } from './config'
 const columnSpans = getSpansColumn(columns)
 const columnConfig = calculateRowSpans(columnSpans)
 const resultColumns = generateMergedColumns(columnConfig)
