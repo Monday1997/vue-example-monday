@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import type { TColumn, TColumnProps } from './data'
-import { EItem } from './data'
+import { EItem } from './config'
 import {
   columnsWithForm as columns,
   selectOptions,
