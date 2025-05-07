@@ -45,7 +45,24 @@ export const pagesRoute: TMenuRouteRaw[] = [
     ]
   },
 
-
+  {
+    path: 'excel-handler',
+    name: 'excelHandler',
+    meta: {
+      title: 'excel导入导出'
+    },
+    redirect: '/pages/excel-handler/excel-out',
+    children: [
+      {
+        path: 'excel-out',
+        component: () => import('@/views/excel-handler/excel-out/index.vue'),
+        name: 'excelOut',
+        meta: {
+          title: 'excel导出'
+        },
+      },
+    ]
+  }
 ]
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,7 +71,8 @@ const router = createRouter({
       name: 'pages',
       component: Layout,
       path: '/pages',
-      redirect: 'merge-table-rows1',
+      alias: '/',
+      redirect: 'merge-table',
       children: [
         ...pagesRoute
       ]
