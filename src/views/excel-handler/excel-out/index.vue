@@ -22,52 +22,20 @@
 </template>
 
 <script setup lang="ts">
-import { loadXLSX } from '@/utils/laodScript'
 import { columns } from './config'
+import { useExcelHandle } from '@/composable/use-excel-handle'
 const formFile = ref<HTMLInputElement>()
 const dataMap: Record<string, string | undefined> = {} //{数据1:data1}
 
 columns.forEach((item) => {
   dataMap[item.title as string] = item.dataIndex as string
 })
-const tableList = ref<any[]>([])
-const tableLoading = ref(false)
+const { tableLoading, tableList, importTable } = useExcelHandle(
+  formFile as Ref<HTMLInputElement>,
+  columns,
+)
 async function modalUpload() {
-  try {
-    tableLoading.value = true
-    await loadXLSX()
-    const file = formFile.value?.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = async function (e) {
-      console.log('🚀 ~ e:', e)
-      if (e.target) {
-        const data = e.target.result
-        const workbook = XLSX.read(data, { type: 'binary' })
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-        // const raw_data = XLSX.utils.sheet_to_json(worksheet,{header:1})
-        // 另一种数据格式
-        const raw_data: Record<string, any>[] =
-          XLSX.utils.sheet_to_json(worksheet)
-        const showTableList = raw_data.map((item) => {
-          const result: Record<string, any> = {}
-          Object.entries(item).forEach(([key, value]: [string, unknown]) => {
-            if (dataMap[key] !== undefined) {
-              result[dataMap[key]] = value
-            }
-          })
-          return result
-        })
-        tableList.value = showTableList
-        tableLoading.value = false
-        console.log('🚀 ~ raw_data:', showTableList)
-      }
-    }
-    reader.readAsArrayBuffer(file)
-  } catch (error) {
-    console.error(error)
-    tableLoading.value = false
-  }
+  importTable()
 }
 </script>
 
