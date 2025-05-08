@@ -54,13 +54,21 @@ export const pagesRoute: TMenuRouteRaw[] = [
     redirect: '/pages/excel-handler/excel-out',
     children: [
       {
+        path: 'excel-in',
+        component: () => import('@/views/excel-handler/excel-in/index.vue'),
+        name: 'excelIn',
+        meta: {
+          title: 'excel导入'
+        },
+      },
+      {
         path: 'excel-out',
         component: () => import('@/views/excel-handler/excel-out/index.vue'),
         name: 'excelOut',
         meta: {
-          title: 'excel导出'
+          title: 'excel导处'
         },
-      },
+      }
     ]
   }
 ]
