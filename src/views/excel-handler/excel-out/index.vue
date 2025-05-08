@@ -1,18 +1,12 @@
 <template>
   <div>
-    <a-button @click="formFile!.click()">
-      导入
-      <input
-        ref="formFile"
-        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        multiple
-        style="display: none"
-        type="file"
-        @input="modalUpload"
-      />
-    </a-button>
+    <a-space>
+      <a-button type="primary" @click="exportData" :loading="btnLoading">
+        导出数据
+      </a-button>
+    </a-space>
     <a-table
-      :loading="tableLoading"
+      :loading="btnLoading"
       :pagination="false"
       bordered
       :columns="columns"
@@ -22,20 +16,22 @@
 </template>
 
 <script setup lang="ts">
-import { columns } from './config'
+import { columns } from '../config'
 import { useExcelHandle } from '@/composable/use-excel-handle'
-const formFile = ref<HTMLInputElement>()
-const dataMap: Record<string, string | undefined> = {} //{数据1:data1}
+const tableList = [
+  {
+    data1: '1',
+    data2: '2',
+    data3: '2',
+    data4: '2',
+    data5: '2',
+    data6: '2',
+  },
+]
 
-columns.forEach((item) => {
-  dataMap[item.title as string] = item.dataIndex as string
-})
-const { tableLoading, tableList, importTable } = useExcelHandle(
-  formFile as Ref<HTMLInputElement>,
-  columns,
-)
-async function modalUpload() {
-  importTable()
+const { btnLoading, exportTable } = useExcelHandle(columns)
+function exportData() {
+  exportTable(tableList)
 }
 </script>
 
