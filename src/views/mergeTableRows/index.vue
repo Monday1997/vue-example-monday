@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <PageLayout :navs="['合并表格', '简单合并']" title="简单合并">
     <a-table bordered :columns="resultColumns" :dataSource="list"></a-table>
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">

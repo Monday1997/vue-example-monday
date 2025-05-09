@@ -1,10 +1,13 @@
 <template>
-  <div>
-    <a-space>
-      <a-button type="primary" @click="exportData" :loading="btnLoading">
-        导出数据
-      </a-button>
-    </a-space>
+  <PageLayout :navs="['excel导入导出', '导出数据']" title="导出数据">
+    <template #extract-btn>
+      <a-space>
+        <a-button type="primary" @click="exportData" :loading="btnLoading">
+          导出数据
+        </a-button>
+      </a-space>
+    </template>
+
     <a-table
       :loading="btnLoading"
       :pagination="false"
@@ -12,7 +15,7 @@
       :columns="columns"
       :dataSource="tableList"
     ></a-table>
-  </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">

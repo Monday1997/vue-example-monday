@@ -12,6 +12,7 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     Components({
+      dirs: ['./src/Layout/page-layout'],
       resolvers: [
         AntDesignVueResolver({
           importStyle: false, // css in js

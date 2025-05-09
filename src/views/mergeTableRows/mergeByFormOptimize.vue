@@ -1,31 +1,33 @@
 <template>
-  <a-form :model="form">
-    <a-row :gutter="8">
-      <a-col v-bind="spans" v-for="item in formGroup" :key="item.key">
-        <a-form-item v-model:value="form[item.key]" :label="item.label">
-          <a-select
-            mode="multiple"
-            v-model:value="form[item.key]"
-            :options="selectOptions[item.key]"
-          ></a-select>
-        </a-form-item>
-      </a-col>
-    </a-row>
-  </a-form>
-  <a-table
-    :scroll="{ y: 500 }"
-    :pagination="false"
-    class="ant-table-striped"
-    bordered
-    :columns="resultColumns"
-    :dataSource="resultList"
-  >
-    <template #bodyCell="{ column, record }">
-      <template v-if="column.dataIndex === 'price'">
-        <a-input v-model:value="record.price"></a-input>
+  <PageLayout :navs="['合并表格', '添加操作-升级优化']" title="升级优化">
+    <a-form :model="form">
+      <a-row :gutter="8">
+        <a-col v-bind="spans" v-for="item in formGroup" :key="item.key">
+          <a-form-item v-model:value="form[item.key]" :label="item.label">
+            <a-select
+              mode="multiple"
+              v-model:value="form[item.key]"
+              :options="selectOptions[item.key]"
+            ></a-select>
+          </a-form-item>
+        </a-col>
+      </a-row>
+    </a-form>
+    <a-table
+      :scroll="{ y: 500 }"
+      :pagination="false"
+      class="ant-table-striped"
+      bordered
+      :columns="resultColumns"
+      :dataSource="resultList"
+    >
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'price'">
+          <a-input v-model:value="record.price"></a-input>
+        </template>
       </template>
-    </template>
-  </a-table>
+    </a-table>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
