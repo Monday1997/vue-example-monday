@@ -1,10 +1,9 @@
 <template>
   <a-menu
-    theme="dark"
     mode="inline"
     v-model:selectedKeys="selectedKeys"
     v-model:openKeys="openKeys"
-    style="width: 100%"
+    style="width: 100%; background-color: #0a0f11; color: white"
     :items="items"
     @click="handleClick"
   />

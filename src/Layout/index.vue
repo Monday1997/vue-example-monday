@@ -2,7 +2,6 @@
 import HomeMenu from './home-menu/index.vue'
 import type { CSSProperties } from 'vue'
 
-const collapsed = ref(false)
 const containerStyle: CSSProperties = {
   padding: '24px',
   background: '#f5f5f5',
@@ -11,7 +10,7 @@ const containerStyle: CSSProperties = {
 </script>
 <template>
   <a-layout>
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
+    <a-layout-sider style="background-color: #0a0f11" :trigger="null">
       <HomeMenu />
     </a-layout-sider>
     <a-layout-content :style="containerStyle">
