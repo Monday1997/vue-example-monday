@@ -10,7 +10,7 @@ const containerStyle: CSSProperties = {
 </script>
 <template>
   <a-layout>
-    <a-layout-sider style="background-color: #0a0f11" :trigger="null">
+    <a-layout-sider :trigger="null">
       <HomeMenu />
     </a-layout-sider>
     <a-layout-content :style="containerStyle">
