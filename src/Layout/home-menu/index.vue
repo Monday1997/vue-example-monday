@@ -3,7 +3,7 @@
     mode="inline"
     v-model:selectedKeys="selectedKeys"
     v-model:openKeys="openKeys"
-    style="width: 100%; background-color: #0a0f11; color: white"
+    style="width: 100%"
     :items="items"
     @click="handleClick"
   />
@@ -51,5 +51,3 @@ function handleClick(item: TMenu) {
   })
 }
 </script>
-
-<style scoped></style>
