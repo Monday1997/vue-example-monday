@@ -20,7 +20,7 @@ export function useExcelHandle<T extends TusualObj = TusualObj>(columns: TableCo
     try {
       tableLoading.value = true
       await loadXLSX()
-      const file = refInput.value?.files?.[0]
+      const file = refInput?.value?.files?.[0]
       if (!file) return
 
       const reader = new FileReader()

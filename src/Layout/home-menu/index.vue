@@ -10,8 +10,8 @@
 </template>
 
 <script setup lang="ts">
-import { pagesRoute } from '@/router/index'
-import type { TMenuRouteRaw } from '@/router/index'
+import { pagesRoute } from '@/router/config'
+import type { TMenuRouteRaw } from '@/router/config'
 const route = useRoute()
 const router = useRouter()
 
