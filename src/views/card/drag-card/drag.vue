@@ -2,10 +2,10 @@
   <div style="position: relative">
     <transition-group name="list">
       <div
-        v-for="(item, index) in dragItems"
-        class="no-select"
+        v-for="(item, index) in dragList"
+        class="no-select list-item-wrap"
+        :class="{ 'ban-move': item.noDrag || disabled }"
         :key="item.dragId"
-        :class="['list-item-wrap']"
         :style="listItemWrapStyle"
         @dragover.prevent
       >
@@ -16,7 +16,7 @@
           :draggable="!item.noDrag"
         >
           <slot :index="index" :item="item" name="item">
-            <div :class="{ 'list-item': true, 'list-move': disabled }">
+            <div :class="{ 'list-item': true, 'ban-move': disabled }">
               {{ item[labelKey] }}
             </div>
           </slot>
@@ -51,14 +51,14 @@ const props = defineProps({
   /** 插入区域方向，默认为垂直方向 */
   direction: {
     type: String as PropType<'vertical' | 'horizontal'>,
-    default: 'vertical', // vertical | horizontal
+    default: 'vertical',
   },
   /** 设置内边距 也可以理解为空隙 */
   padding: {
     type: [String, Number],
     default: '6',
   },
-  items: {
+  list: {
     type: Array as PropType<any[]>,
     required: true,
   },
@@ -73,7 +73,7 @@ const props = defineProps({
   },
   /** 外部容器的自定义样式 */
   propListItemWrapStyle: {
-    type: Object,
+    type: Object as PropType<CSSProperties>,
     default() {
       return {}
     },
@@ -84,9 +84,9 @@ const props = defineProps({
   },
 })
 const emits = defineEmits<{
-  'on-sort': [dragItems: any[]]
+  'on-sort': [dragList: any[]]
   'on-drag-start': [{ index: number; dragId: string }]
-  'update:items': [data: any[]]
+  'update:list': [data: any[]]
 }>()
 
 const draggedId = refNull<string>(null)
@@ -101,17 +101,15 @@ const listItemWrapStyle = computed<CSSProperties>(() => {
   }
 })
 
-const dragItems = ref<any[]>([]) // 每个项目必须有id
-
-watch(() => props.items.length, initItems, { immediate: true })
+const dragList = ref<any[]>([]) // 每个项目必须有id
+watch(() => props.list.length, initItems, { immediate: true })
 function initItems() {
-  console.log('改了')
-
   const id = `drag_${Math.random().toString(16).slice(-6)}${Date.now()}`
-  dragItems.value = props.items
-  dragItems.value.forEach((item, index) => {
-    item.dragId = item.id || item.dragId || `${id}${index.toString()}`
-  })
+  dragList.value = props.list.map((item, index) => ({
+    ...item,
+    dragId: item.id || item.dragId || `${id}${index.toString()}`,
+  }))
+  emits('update:list', dragList.value)
 }
 
 let draggedIndex = -1
@@ -139,8 +137,9 @@ function handleDrop(event: DragEvent) {
     if (draggedIndex === index) {
       return
     }
-    dragItems.value.splice(index, 0, dragItems.value.splice(draggedIndex, 1)[0])
-    emits('on-sort', dragItems.value)
+    dragList.value.splice(index, 0, dragList.value.splice(draggedIndex, 1)[0])
+    emits('update:list', dragList.value)
+    emits('on-sort', dragList.value)
   }
 }
 function handleDragEnd() {
@@ -195,8 +194,8 @@ function handleDragLeave(event: DragEvent) {
   height: 100%;
   background: rgba(255, 0, 179, 0.2);
 }
-.list-move:hover {
-  cursor: move;
+.ban-move {
+  cursor: not-allowed;
 }
 .drag-zone-slide {
   position: absolute;
