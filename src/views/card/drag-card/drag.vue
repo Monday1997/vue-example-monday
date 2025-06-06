@@ -3,18 +3,18 @@
     <transition-group name="list">
       <div
         v-for="(item, index) in dragItems"
+        class="no-select"
         :key="item.dragId"
         :class="['list-item-wrap']"
         :style="listItemWrapStyle"
-        @dragend.stop="handleDragEnd($event)"
-        @dragenter.stop="handleDragEnter($event)"
-        @dragleave.stop="handleDragLeave($event)"
         @dragover.prevent
-        @dragstart.stop="handleDragStart($event, index, item.dragId)"
-        @drop.prevent.stop="handleDrop($event)"
       >
-        <!-- 列表项目容器，可以通过插槽插入其他内容，允许拖拽 -->
-        <div :draggable="!item.noDrag">
+        <!-- 列表项目容器，可以通过插槽插入其他内容 -->
+        <div
+          @dragstart.stop="(e) => handleDragStart(e, index, item.dragId)"
+          @dragend.stop="handleDragEnd"
+          :draggable="!item.noDrag"
+        >
           <slot :index="index" :item="item" name="item">
             <div :class="{ 'list-item': true, 'list-move': disabled }">
               {{ item[labelKey] }}
@@ -25,212 +25,147 @@
             <div v-if="item.dragId === draggedId" class="list-item-active" />
           </transition>
         </div>
-        <template
-          v-if="!item.noDrag && draggedId !== null && draggedId !== item.dragId"
-        >
-          <!-- 放置显示器，前 -->
-          <div
-            class="drag-zone drag-zone-slide"
-            :data-index="index"
-            data-type="slide"
-            :style="dragZoneBeforeStyle"
-          />
-          <!-- 放置显示器，后 -->
-          <div
-            class="drag-zone drag-zone-slide"
-            :data-index="index + 1"
-            data-type="slide"
-            :style="dragZoneAfterStyle"
-          />
-          <!-- 放置显示器，覆盖 -->
-          <div class="drag-zone drag-zone-rect" :data-index="index" />
-        </template>
+
+        <!-- 显示的色块 -->
+        <div
+          @dragenter.stop="handleDragEnter"
+          @dragleave.stop="handleDragLeave"
+          @drop.prevent.stop="handleDrop"
+          v-if="
+            !item.noDrag && !isEmpty(draggedId) && draggedId !== item.dragId
+          "
+          class="drag-zone drag-zone-rect"
+          :data-index="index"
+        />
       </div>
     </transition-group>
     <slot name="after" />
   </div>
 </template>
 
-<script>
-export default {
-  name: 'drag-sort',
-  props: {
-    // 插入区域方向，默认为垂直方向。垂直的按行布局，横向的按块布局。
-    direction: {
-      type: String,
-      default: 'vertical', // vertical | horizontal
-    },
-    // 列表拖拽容器和内部项目的间距，同时也是放置显示器的宽或高
-    padding: {
-      type: [String, Number],
-      default: '6',
-    },
-    items: {
-      type: Array,
-      required: true,
-    },
-    labelKey: {
-      type: String,
-      default: 'label',
-    },
-    itemWidth: {
-      type: [String, Number],
-      default: 'auto',
-    },
-    propListItemWrapStyle: {
-      type: Object,
-      default() {
-        return {}
-      },
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
+<script lang="ts" setup>
+import type { PropType, CSSProperties } from 'vue'
+import { refNull } from '@/utils/tsHelp'
+import { isNumber, isEmpty } from '@/utils/is-type'
+const props = defineProps({
+  /** 插入区域方向，默认为垂直方向 */
+  direction: {
+    type: String as PropType<'vertical' | 'horizontal'>,
+    default: 'vertical', // vertical | horizontal
+  },
+  /** 设置内边距 也可以理解为空隙 */
+  padding: {
+    type: [String, Number],
+    default: '6',
+  },
+  items: {
+    type: Array as PropType<any[]>,
+    required: true,
+  },
+  labelKey: {
+    type: String,
+    default: 'label',
+  },
+  /** 可移动模块的宽度占比 */
+  itemWidth: {
+    type: [String, Number],
+    default: 'auto',
+  },
+  /** 外部容器的自定义样式 */
+  propListItemWrapStyle: {
+    type: Object,
+    default() {
+      return {}
     },
   },
-  emits: ['on-sort', 'on-drag-start'],
-  data() {
-    return {
-      dragItems: [], // 每个项目必须有id
-      draggedId: null,
-      dragZoneBeforeStyle: {},
-      dragZoneAfterStyle: {},
-      id: '', // 组件每次列表设置，同时设置一个id
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+})
+const emits = defineEmits<{
+  'on-sort': [dragItems: any[]]
+  'on-drag-start': [{ index: number; dragId: string }]
+  'update:items': [data: any[]]
+}>()
+
+const draggedId = refNull<string>(null)
+
+// 列表容器样式
+const listItemWrapStyle = computed<CSSProperties>(() => {
+  return {
+    display: props.direction === 'vertical' ? 'block' : 'inline-block',
+    padding: `${props.padding}px`,
+    width: isNumber(props.itemWidth) ? `${props.itemWidth}px` : props.itemWidth,
+    ...props.propListItemWrapStyle,
+  }
+})
+
+const dragItems = ref<any[]>([]) // 每个项目必须有id
+
+watch(() => props.items.length, initItems, { immediate: true })
+function initItems() {
+  console.log('改了')
+
+  const id = `drag_${Math.random().toString(16).slice(-6)}${Date.now()}`
+  dragItems.value = props.items
+  dragItems.value.forEach((item, index) => {
+    item.dragId = item.id || item.dragId || `${id}${index.toString()}`
+  })
+}
+
+let draggedIndex = -1
+let draggedHTML: HTMLElement | null = null
+
+function handleDragStart(event: DragEvent, index: number, dragId: string) {
+  if (draggedHTML || props.disabled) {
+    return
+  }
+  draggedHTML = event.currentTarget as HTMLElement
+  draggedIndex = index
+  draggedId.value = dragId
+  emits('on-drag-start', {
+    index,
+    dragId,
+  })
+}
+
+function handleDrop(event: DragEvent) {
+  const target = event.currentTarget as HTMLElement
+  // 放置
+  if (target.classList.contains('drag-zone')) {
+    target.style.background = ''
+    const index = parseInt(target.getAttribute('data-index')!)
+    if (draggedIndex === index) {
+      return
     }
-  },
-  computed: {
-    // 列表容器样式
-    listItemWrapStyle() {
-      return {
-        display: this.direction === 'vertical' ? 'block' : 'inline-block',
-        padding: `${this.padding}px`,
-        width: isNaN(this.itemWidth) ? this.itemWidth : `${this.itemWidth}px`,
-        ...this.propListItemWrapStyle,
-      }
-    },
-  },
-  watch: {
-    items: {
-      handler() {
-        this.initItems()
-      },
-      immediate: true,
-    },
-    direction: {
-      handler() {
-        const px = `${this.padding}px`
-        if (this.direction === 'vertical') {
-          const style = {
-            left: px,
-            right: px,
-            height: px,
-          }
-          this.dragZoneBeforeStyle = {
-            top: 0,
-            ...style,
-          }
-          this.dragZoneAfterStyle = {
-            bottom: 0,
-            ...style,
-          }
-        } else {
-          const style = {
-            top: px,
-            bottom: px,
-            width: px,
-          }
-          this.dragZoneBeforeStyle = {
-            left: 0,
-            ...style,
-          }
-          this.dragZoneAfterStyle = {
-            right: 0,
-            ...style,
-          }
-        }
-      },
-      immediate: true,
-    },
-  },
-  beforeUnmount() {
-    // this.dragItems = [];
-  },
-  methods: {
-    initItems() {
-      // 一般来说最好不要修改props（原始）的数据
-      // 但是这里不这样做的话，在新增或者删除过渡会有点异常
-      this.id = `drag_${Math.random().toString(16).slice(-6)}${new Date().getTime()}`
+    dragItems.value.splice(index, 0, dragItems.value.splice(draggedIndex, 1)[0])
+    emits('on-sort', dragItems.value)
+  }
+}
+function handleDragEnd() {
+  if (draggedHTML) {
+    draggedHTML.style.background = ''
+  }
+  setTimeout(() => {
+    draggedHTML = null
+    draggedId.value = ''
+  }, 600)
+}
 
-      // 1.0
-      this.dragItems = this.items
-
-      // 2.0
-      // 先清空已有数据
-      // this.dragItems.splice(0, this.dragItems.length);
-      // Array.prototype.push.apply(this.dragItems, this.items);
-
-      this.dragItems.forEach((item, index) => {
-        item.dragId = item.id || item.dragId || `${this.id}${index.toString()}`
-      })
-    },
-    handleDrop(event) {
-      // 放置
-      if (event.target.classList.contains('drag-zone')) {
-        event.target.style.background = ''
-        let index = parseInt(event.target.getAttribute('data-index'))
-        const type = event.target.getAttribute('data-type')
-        if (this.draggedIndex === index) {
-          return
-        }
-        if (this.draggedIndex < index && type === 'slide') {
-          index -= 1
-        }
-        this.dragItems.splice(
-          index,
-          0,
-          this.dragItems.splice(this.draggedIndex, 1)[0],
-        )
-        this.$emit('on-sort', this.dragItems)
-      }
-    },
-    handleDragStart(event, index, dragId) {
-      if (this.disabled) {
-        return
-      }
-      if (this.dragged) {
-        return
-      }
-      this.dragged = event.target
-      this.draggedIndex = index
-      this.draggedId = dragId
-      this.$emit('on-drag-start', {
-        index,
-        dragId,
-      })
-    },
-    handleDragEnd() {
-      this.dragged && (this.dragged.style.background = '')
-      setTimeout(() => {
-        this.dragged = null
-        this.draggedId = null
-      }, 600)
-    },
-    handleDragEnter(event) {
-      // 当可拖动的元素进入可放置的目标高亮目标节点
-      if (event.target.classList.contains('drag-zone')) {
-        event.target.style.background = 'rgb(0, 200, 190)'
-      }
-    },
-    handleDragLeave(event) {
-      // 当拖动元素离开可放置目标节点，重置其背景
-      if (event.target.classList.contains('drag-zone')) {
-        event.target.style.background = ''
-      }
-    },
-    getDrags() {
-      return this.dragItems
-    },
-  },
+function handleDragEnter(event: DragEvent) {
+  const target = event.currentTarget as HTMLElement
+  // 当可拖动的元素进入可放置的目标高亮目标节点
+  if (target.classList.contains('drag-zone')) {
+    target.style.background = 'blue'
+  }
+}
+function handleDragLeave(event: DragEvent) {
+  const target = event.currentTarget as HTMLElement
+  // 当拖动元素离开可放置目标节点，重置其背景
+  if (target.classList.contains('drag-zone')) {
+    target.style.background = ''
+  }
 }
 </script>
 
@@ -258,7 +193,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(164, 235, 231, 0.2);
+  background: rgba(255, 0, 179, 0.2);
 }
 .list-move:hover {
   cursor: move;
@@ -276,9 +211,7 @@ export default {
   height: 100%;
   opacity: 0.4;
 }
-.drag-zone-active {
-  background: rgb(0, 200, 190);
-}
+
 .fade-drag-enter-active,
 .fade-drag-leave-active {
   transition: all 0.6s ease;
@@ -296,5 +229,11 @@ export default {
 /** 不加这个，列表add和remove过渡效果会不出现 */
 .list-leave-active {
   position: absolute;
+}
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 </style>
