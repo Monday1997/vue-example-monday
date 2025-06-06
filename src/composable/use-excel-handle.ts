@@ -1,4 +1,4 @@
-import { loadXLSX } from '@/utils/laodScript'
+import { loadXLSX } from '@/utils/loadScript'
 import type { TableColumnType } from 'ant-design-vue'
 import { ref } from 'vue'
 import type { Ref } from 'vue'
