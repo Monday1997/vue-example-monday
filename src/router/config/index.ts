@@ -91,6 +91,14 @@ const Other = {
       meta: {
         title: '高亮特殊字段'
       },
+    },
+    {
+      path: 'water-remark',
+      component: () => import('@/views/card/water-remark/index.vue'),
+      name: 'water-remark',
+      meta: {
+        title: '水印'
+      },
     }
   ]
 }
