@@ -35,11 +35,11 @@ const keys: string[] = []
 for (const key in mapData) {
   keys.push(key)
 }
-// 根据map动态填写规则
-// 今天突然感冒了，请问吃三九好还是小柴胡好
-const str = '这是一份买车险'
+const str = '今天突然感冒了，请问吃三九好还是小柴胡好'
 
 const { textData } = useSplitWrords(str, keys)
+// 正则方式
+// const { textData } = useSplitWrords(str, /(感冒)/)
 
 const card = reactive({ show: false, x: 0, y: 0, text: '', id: -1 })
 function showCard(item: string, e: MouseEvent) {
@@ -69,7 +69,7 @@ function hideCard() {
   cursor: pointer;
 }
 .text_box .card {
-  width: 120px;
+  width: 250px;
   background-color: #bfc;
   border-radius: 20px;
   position: absolute;
