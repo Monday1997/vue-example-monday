@@ -14,12 +14,13 @@ function useSplitWrords(str: string, keysOrReg: RegExp | string[]): TReturn {
   const textData = ref<string[]>([])
   const reg: RegExp = isReg(keysOrReg) ? keysOrReg : new RegExp(`(${keysOrReg.join('|')})`, 'g')
   let result: RegExpExecArray | null = null
-  let currentIndex = 0
+  let currentIndex = 0, regIndex = -1
   const returnData: string[] = []
-  while ((result = reg.exec(str)) ) {
+  while ((result = reg.exec(str)) && regIndex !== result!.index) {
     returnData.push(str.slice(currentIndex, result.index))
     returnData.push(result[1])
     currentIndex = result.index + result[0].length
+    regIndex = result.index
   }
   if (str.length > currentIndex) {
     returnData.push(str.slice(currentIndex, str.length))
