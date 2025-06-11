@@ -83,6 +83,14 @@ const Other = {
       meta: {
         title: '移动卡片'
       },
+    },
+    {
+      path: 'high-light',
+      component: () => import('@/views/card/reg-high-light/index.vue'),
+      name: 'highLight',
+      meta: {
+        title: '高亮特殊字段'
+      },
     }
   ]
 }
