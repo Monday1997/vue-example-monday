@@ -8,8 +8,6 @@ type TReturn = {
  * @param str string 要被处理的文字
  * @param reg string[]|RegExp 需要筛选的文字数组|自定义正则
  */
-function useSplitWrords(str: string, reg: RegExp): TReturn
-function useSplitWrords(str: string, keys: string[]): TReturn
 function useSplitWrords(str: string, keysOrReg: RegExp | string[]): TReturn {
   const textData = ref<string[]>([])
   const reg: RegExp = isReg(keysOrReg) ? keysOrReg : new RegExp(`(${keysOrReg.join('|')})`, 'g')

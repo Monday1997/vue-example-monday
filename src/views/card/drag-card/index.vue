@@ -1,27 +1,29 @@
 <template>
-  <h2>竖排</h2>
-  <Drag v-model:list="list" :itemWidth="'25%'" direction="horizontal">
-    <template #item="{ index, item }">
-      <div class="flex-wrap flex-y-center wrap-box">
-        <div class="book-bg">
-          <h2 class="title">《{{ item.title }}》</h2>
-          <div class="auth">{{ item.auth }}</div>
-          <div v-if="item.noDrag" class="no-drag-text">禁止移动</div>
-          <div class="descript">{{ item.descript }}</div>
+  <PageLayout :navs="['其他', '移动卡片']">
+    <h2>竖排</h2>
+    <Drag v-model:list="list" :itemWidth="'25%'" direction="horizontal">
+      <template #item="{ index, item }">
+        <div class="flex-wrap flex-y-center wrap-box">
+          <div class="book-bg">
+            <h2 class="title">《{{ item.title }}》</h2>
+            <div class="auth">{{ item.auth }}</div>
+            <div v-if="item.noDrag" class="no-drag-text">禁止移动</div>
+            <div class="descript">{{ item.descript }}</div>
+          </div>
+          <div class="tool-box flex-wrap flex-x-center flex-y-center">
+            <DeleteOutlined @click="remove(index)" style="cursor: pointer" />
+          </div>
         </div>
-        <div class="tool-box flex-wrap flex-x-center flex-y-center">
-          <DeleteOutlined @click="remove(index)" style="cursor: pointer" />
-        </div>
-      </div>
-    </template>
-  </Drag>
-  <br />
-  <h2>横排</h2>
-  <Drag
-    v-model:list="titleList"
-    :propListItemWrapStyle="{ width: '200px' }"
-    labelKey="data"
-  />
+      </template>
+    </Drag>
+    <br />
+    <h2>横排</h2>
+    <Drag
+      v-model:list="titleList"
+      :propListItemWrapStyle="{ width: '200px' }"
+      labelKey="data"
+    />
+  </PageLayout>
 </template>
 
 <script setup lang="ts">

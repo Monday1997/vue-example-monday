@@ -1,30 +1,32 @@
 <template>
-  <div class="text_box">
-    <div
-      :class="{ hightLight: index % 2 !== 0 }"
-      v-for="(item, index) in textData"
-      :key="index"
-    >
-      <span>{{ item }}</span>
-
-      <img
-        v-if="index % 2 !== 0"
-        @click="showCard(item, $event)"
-        src="https://img95.699pic.com/element/40029/9841.png_860.png"
-      />
-    </div>
-    <Transition name="card">
-      <!-- 弹出的卡片 -->
+  <PageLayout :navs="['其他', '高亮']" title="高亮">
+    <div class="text_box">
       <div
-        v-click-outside="hideCard"
-        class="card"
-        v-show="card.show"
-        :style="`left:${card.x}px;top:${card.y}px`"
+        :class="{ hightLight: index % 2 !== 0 }"
+        v-for="(item, index) in textData"
+        :key="index"
       >
-        {{ card.text }}
+        <span>{{ item }}</span>
+
+        <img
+          v-if="index % 2 !== 0"
+          @click="showCard(item, $event)"
+          src="https://img95.699pic.com/element/40029/9841.png_860.png"
+        />
       </div>
-    </Transition>
-  </div>
+      <Transition name="card">
+        <!-- 弹出的卡片 -->
+        <div
+          v-click-outside="hideCard"
+          class="card"
+          v-show="card.show"
+          :style="`left:${card.x}px;top:${card.y}px`"
+        >
+          {{ card.text }}
+        </div>
+      </Transition>
+    </div>
+  </PageLayout>
 </template>
 
 <script setup lang="ts">
