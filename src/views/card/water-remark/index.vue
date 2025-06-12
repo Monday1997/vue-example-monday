@@ -14,10 +14,16 @@
         这是重要内容这是重要内容,这是重要内容这是重要内容,这是重要内容这是重要内容,这是重要内容
       </div>
     </div>
+
+    <SelfSpace>
+      <div>模拟a-sapce</div>
+      <div>模拟a-sapce</div>
+    </SelfSpace>
   </PageLayout>
 </template>
 
 <script setup lang="ts">
+import SelfSpace from './self-space.tsx'
 function createImg(content: string[] | string): string {
   const canvas = document.createElement('canvas') as HTMLCanvasElement
   const ctx = canvas.getContext('2d')

@@ -2,6 +2,7 @@ import { fileURLToPath, URL } from 'node:url'
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
 import AutoImport from 'unplugin-auto-import/vite'
@@ -10,6 +11,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 export default defineConfig({
   plugins: [
     vue(),
+    vueJsx(),
     vueDevTools(),
     Components({
       dirs: ['./src/Layout/page-layout'],
