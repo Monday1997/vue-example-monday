@@ -153,13 +153,17 @@ function handleDragEnd() {
 }
 
 function handleDragEnter(event: DragEvent) {
+  console.log('进入')
+
   const target = event.currentTarget as HTMLElement
+
   // 当可拖动的元素进入可放置的目标高亮目标节点
   if (target.classList.contains('drag-zone')) {
     target.style.background = 'blue'
   }
 }
 function handleDragLeave(event: DragEvent) {
+  console.log('离开')
   const target = event.currentTarget as HTMLElement
   // 当拖动元素离开可放置目标节点，重置其背景
   if (target.classList.contains('drag-zone')) {

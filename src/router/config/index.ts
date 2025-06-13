@@ -95,9 +95,17 @@ const Other = {
     {
       path: 'water-remark',
       component: () => import('@/views/card/water-remark/index.vue'),
-      name: 'water-remark',
+      name: 'waterCemark',
       meta: {
         title: '水印'
+      },
+    },
+    {
+      path: 'drag-content',
+      component: () => import('@/views/card/drag-content/index.vue'),
+      name: 'dragContent',
+      meta: {
+        title: '内容拖拽'
       },
     }
   ]
