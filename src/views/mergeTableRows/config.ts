@@ -1,4 +1,5 @@
 import type { TColumnProps, TColumn } from './data'
+import { setCustomCell } from '@/utils/tools/table-utils'
 export enum EItem {
   scheme = 'scheme',
   attr1 = 'attr1',
@@ -37,7 +38,57 @@ export const columns: TColumnProps = [
     width: 120,
   },
 ]
+export const staticColumns: TColumnProps = [
+  {
+    title: '套餐',
+    dataIndex: EItem.scheme,
+    width: 120,
+    customCell: (record) => {
+      return {
+        rowSpan: record['column_span_scheme']
+      }
+    }
+    // customCell: setCustomCell('scheme')
+  },
+  {
+    title: '内存',
+    dataIndex: EItem.attr1,
+    width: 120,
+    // customCell: setCustomCell('attr1')
+    customCell: (record) => {
+      return {
+        rowSpan: record['column_span_attr1']
+      }
+    }
+  },
+  {
+    title: '颜色',
+    dataIndex: EItem.attr2,
+    width: 120,
+    // customCell: setCustomCell('attr2')
+    customCell: (record) => {
+      return {
+        rowSpan: record['column_span_attr2']
+      }
+    }
 
+  },
+  {
+    title: '运行内存',
+    dataIndex: EItem.attr3,
+    width: 120,
+  },
+  {
+    title: '进价',
+    dataIndex: 'price',
+    width: 120,
+  },
+  {
+    title: '售价',
+    dataIndex: 'price2',
+    width: 120,
+  },
+]
 export const list: Record<TColumn, string>[] = [
   {
     scheme: '普通套餐',

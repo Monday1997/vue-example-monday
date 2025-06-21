@@ -23,6 +23,14 @@ const TableRoute = {
       },
     },
     {
+      path: 'merge-table-array2',
+      component: () => import('@/views/mergeTableRows/merger-form-static.vue'),
+      name: 'mergeTableArray2',
+      meta: {
+        title: '合并表格(静态列)'
+      },
+    },
+    {
       path: 'merge-table-by-form',
       component: () => import('@/views/mergeTableRows/mergeByForm.vue'),
       name: 'mergeTableByForm',
