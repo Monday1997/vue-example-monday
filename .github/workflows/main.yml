@@ -1,0 +1,37 @@
+name: "vue-example-monday"
+on:
+  workflow_dispatch: {}
+  push:                  # 代码推送时触发
+    branches:            # 指定触发分支
+      - main             # 默认分支
+      - master           # 旧版默认分支
+      - Monday1997-patch-1  # 你的特定分支
+permissions: 
+  contents: write
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup nodejs
+        uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - name: install
+        run: pnpm install
+      - name: build
+        run: pnpm build-only
+      - name: show file
+        run: ls -la && ls dist/
+      - name: Deploy to GitHub Pages
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: gh-pages
+          build_dir: ./dist  
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
