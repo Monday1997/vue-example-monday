@@ -39,7 +39,7 @@ export default defineConfig(() => {
       },
     },
     define: {
-      'import.meta.env.BASE_URL': baseUrl,
+      'import.meta.env.BASE_URL': JSON.stringify(baseUrl),
     },
     base: baseUrl,
   }
