@@ -23,7 +23,11 @@ export default defineConfig(({ mode }) => {
         ],
       }),
       AutoImport({
-        include: [/\.vue$/, /\.vue\.[tj]sx?\?vue/],
+        include: [
+          /\.[tj]sx?$/, // 处理 .ts/.js
+          /\.vue$/, // fallback，对 .vue 文件整体处理（某些 dev 情况）
+          /\.vue\?vue/, // 关键！匹配 .vue 文件内部的脚本模块（如 lang.ts）
+        ],
         imports: ['vue', 'vue-router'],
         dts: true,
       }),
