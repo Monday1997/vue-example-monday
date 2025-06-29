@@ -8,7 +8,8 @@ import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers'
 import AutoImport from 'unplugin-auto-import/vite'
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
+  const baseUrl = process.env.BASE_URL || '/'
   return {
     plugins: [
       vue(),
@@ -23,7 +24,11 @@ export default defineConfig(({ mode }) => {
         ],
       }),
       AutoImport({
-        include: [/\.vue$/, /\.vue\.[tj]sx?\?vue/],
+        include: [
+          /\.[tj]sx?$/, // 处理 .ts/.js
+          /\.vue$/, // fallback，对 .vue 文件整体处理（某些 dev 情况）
+          /\.vue\?vue/, // 关键！匹配 .vue 文件内部的脚本模块（如 lang.ts）
+        ],
         imports: ['vue', 'vue-router'],
         dts: true,
       }),
@@ -33,6 +38,9 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
-    base: mode === 'development' ? '/' : '/vue-example-monday/',
+    define: {
+      'import.meta.env.BASE_URL': baseUrl,
+    },
+    base: baseUrl,
   }
 })
