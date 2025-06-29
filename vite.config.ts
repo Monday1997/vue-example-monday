@@ -38,9 +38,6 @@ export default defineConfig(() => {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
-    define: {
-      'import.meta.env.BASE_URL': JSON.stringify(baseUrl),
-    },
     base: baseUrl,
   }
 })
