@@ -5,9 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import { addSpansValueInList } from '@/utils/tools/table-utils'
+import { addSpansValueInList } from '@/utils/tools/static-table-merge'
 import { list, staticColumns } from './config'
-addSpansValueInList(['scheme', 'attr1', 'attr2', 'attr3'], list)
+import { EItem } from './config'
+addSpansValueInList([EItem.scheme, EItem.attr1, EItem.attr2, EItem.attr3], list)
 </script>
 
 <style scoped></style>

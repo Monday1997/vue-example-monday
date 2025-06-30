@@ -1,5 +1,5 @@
 import type { TColumnProps, TColumn } from './data'
-import { setCustomCell } from '@/utils/tools/table-utils'
+import { setCustomCell } from '@/utils/tools/static-table-merge'
 export enum EItem {
   scheme = 'scheme',
   attr1 = 'attr1',
@@ -43,35 +43,19 @@ export const staticColumns: TColumnProps = [
     title: '套餐',
     dataIndex: EItem.scheme,
     width: 120,
-    customCell: (record) => {
-      return {
-        rowSpan: record['column_span_scheme']
-      }
-    }
-    // customCell: setCustomCell('scheme')
+    customCell: setCustomCell('scheme'),
   },
   {
     title: '内存',
     dataIndex: EItem.attr1,
     width: 120,
-    // customCell: setCustomCell('attr1')
-    customCell: (record) => {
-      return {
-        rowSpan: record['column_span_attr1']
-      }
-    }
+    customCell: setCustomCell('attr1'),
   },
   {
     title: '颜色',
     dataIndex: EItem.attr2,
     width: 120,
-    // customCell: setCustomCell('attr2')
-    customCell: (record) => {
-      return {
-        rowSpan: record['column_span_attr2']
-      }
-    }
-
+    customCell: setCustomCell('attr2'),
   },
   {
     title: '运行内存',
@@ -162,14 +146,16 @@ export const columnsWithForm: TColumnProps = [
   },
 ]
 
-export const formGroup: { label: string, key: EItem }[] = [
+export const formGroup: { label: string; key: EItem }[] = [
   { label: '套餐', key: EItem.scheme },
   { label: '内存', key: EItem.attr1 },
   { label: '颜色', key: EItem.attr2 },
   { label: '运行内存', key: EItem.attr3 },
 ]
 
-export const selectOptions: Partial<Record<EItem, { label: string, value: number }[]>> = {
+export const selectOptions: Partial<
+  Record<EItem, { label: string; value: number }[]>
+> = {
   [EItem.scheme]: [
     { label: '套餐一', value: 11 },
     { label: '套餐二', value: 12 },
