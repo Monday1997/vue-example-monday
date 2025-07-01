@@ -1,0 +1,70 @@
+<template>
+  <PageLayout :navs="['合并表格', '用户操作']" title="用户操作">
+    <a-form :model="form">
+      <a-row :gutter="8">
+        <a-col v-bind="spans" v-for="item in formGroup" :key="item.key">
+          <a-form-item v-model:value="form[item.key]" :label="item.label">
+            <a-select
+              mode="multiple"
+              v-model:value="form[item.key]"
+              :options="selectOptions[item.key]"
+            ></a-select>
+          </a-form-item>
+        </a-col>
+      </a-row>
+    </a-form>
+    <a-table
+      :pagination="false"
+      bordered
+      :columns="resultColumns"
+      :dataSource="resultList"
+    >
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'price'">
+          <a-input v-model:value="record.price"></a-input>
+        </template>
+      </template>
+    </a-table>
+  </PageLayout>
+</template>
+
+<script setup lang="ts">
+import {
+  columnsWithForm as columns,
+  selectOptions,
+  formGroup,
+  spans,
+} from '../config'
+import { userMergeByForm } from '@/composable/table/user-merge-by-form'
+const getSelectOptionApi = () => {
+  return Promise.resolve({
+    selectOptions,
+    initForm: {
+      attr1: [4, 5],
+      attr3: [7, 9],
+    },
+  })
+  /*   return new Promise((r) => {
+      setTimeout(() => {
+        r({
+          selectOptions,
+          initForm: {
+            scheme: [11],
+            attr1: [4, 5],
+            attr2: [],
+            attr3: [7, 9],
+          },
+        })
+      }, 3000)
+    }) */
+}
+const { loadSelectOption, resultColumns, resultList, form } = userMergeByForm({
+  getSelectOptionApi,
+  fixColumns: columns,
+  formGroup,
+})
+loadSelectOption()
+console.log(resultList)
+</script>
+
+<style scoped></style>

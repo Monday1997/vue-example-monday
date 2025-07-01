@@ -14,7 +14,6 @@
       </a-row>
     </a-form>
     <a-table
-      :scroll="{ y: 500 }"
       :pagination="false"
       bordered
       :columns="resultColumns"

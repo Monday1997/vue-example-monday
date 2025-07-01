@@ -1,4 +1,5 @@
 import type { TColumnProps, TColumn } from './data'
+import type { TableColumnType, SelectProps } from 'ant-design-vue'
 import { setCustomCell } from '@/utils/tools/static-table-merge'
 export enum EItem {
   scheme = 'scheme',
@@ -133,7 +134,7 @@ export const list: Record<TColumn, string>[] = [
 ]
 
 // 合并表格二
-export const columnsWithForm: TColumnProps = [
+export const columnsWithForm: TableColumnType[] = [
   {
     title: '进价',
     dataIndex: 'price',
@@ -146,31 +147,29 @@ export const columnsWithForm: TColumnProps = [
   },
 ]
 
-export const formGroup: { label: string; key: EItem }[] = [
-  { label: '套餐', key: EItem.scheme },
-  { label: '内存', key: EItem.attr1 },
-  { label: '颜色', key: EItem.attr2 },
-  { label: '运行内存', key: EItem.attr3 },
+export const formGroup: { label: string; key: string }[] = [
+  { label: '套餐', key: 'scheme' },
+  { label: '内存', key: 'attr1' },
+  { label: '颜色', key: 'attr2' },
+  { label: '运行内存', key: 'attr3' },
 ]
 
-export const selectOptions: Partial<
-  Record<EItem, { label: string; value: number }[]>
-> = {
-  [EItem.scheme]: [
+export const selectOptions: Record<string, SelectProps['options']> = {
+  scheme: [
     { label: '套餐一', value: 11 },
     { label: '套餐二', value: 12 },
   ],
-  [EItem.attr1]: [
+  attr1: [
     { label: '32G', value: 4 },
     { label: '64G', value: 5 },
     { label: '128G', value: 6 },
   ],
-  [EItem.attr2]: [
+  attr2: [
     { label: '红色', value: 1 },
     { label: '黄色', value: 2 },
     { label: '绿色', value: 3 },
   ],
-  [EItem.attr3]: [
+  attr3: [
     { label: '32G', value: 7 },
     { label: '64G', value: 8 },
     { label: '128G', value: 9 },
