@@ -1,4 +1,10 @@
 import type { SelectProps } from 'ant-design-vue'
+/** 更新列时的必要参数 */
+type TColumnUPdateArg = {
+  handlerType: 'addColumn' | 'delColumn' | 'ListUpdate' | 'update'
+  key?: EItem
+  index?: number
+}
 export type TFormGroupItem = {
   label: string
   key: string
