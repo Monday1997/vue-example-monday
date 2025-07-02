@@ -177,10 +177,10 @@ export const selectOptions: Record<string, SelectProps['options']> = {
 }
 
 export const spans = {
-  xs: 8,
-  sm: 8,
-  md: 6,
-  lg: 4,
-  xl: 4,
+  xs: 24,
+  sm: 24,
+  md: 12,
+  lg: 8,
+  xl: 6,
   xxl: 4,
 }

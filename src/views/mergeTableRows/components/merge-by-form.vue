@@ -38,7 +38,7 @@ import {
 import { userMergeByForm } from '@/composable/table/user-merge-by-form'
 const getSelectOptionApi = () => {
   return Promise.resolve({
-    selectOptions,
+    selectConfig: selectOptions,
     initForm: {
       attr1: [4, 5],
       attr3: [7, 9],
@@ -61,6 +61,15 @@ const getSelectOptionApi = () => {
 const { loadSelectOption, resultColumns, resultList, form } = userMergeByForm({
   getSelectOptionApi,
   fixColumns: columns,
+  fixColumnsConfig: {
+    price: (record: any) => {
+      if (record.attr1 === 4) {
+        return 16
+      }
+      return 18
+    },
+    price2: 20,
+  },
   formGroup,
 })
 loadSelectOption()

@@ -84,12 +84,9 @@ export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
     const colsTableMapCpoy = cacheColsTableMap
     cacheColsTableMap = {}
     return result.map((combination, index) => {
-      const obj: { [key: string]: unknown } = { price: 0, price2: 0 }
+      const obj: { [key: string]: unknown } = {}
       const colsValue = combination.join('')
-      if (type === 'udpate') {
-        obj.price = resultList.value[index].price as number
-        obj.price2 = resultList.value[index].price2 as number
-      } else if (type === 'add') {
+      if (type === 'add') {
         if (colsTableMapCpoy[colsValue]) {
           cacheColsTableMap[colsValue] = colsTableMapCpoy[colsValue]
           return cacheColsTableMap[colsValue]
@@ -100,6 +97,23 @@ export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
         obj[`${key}_label`] = formValueLabelMap[combination[keyIndex]]
       })
       cacheColsTableMap[colsValue] = obj
+      fixColumns.map((item) => {
+        obj[item.dataIndex] = 0
+        const currentFixColumnsConfig =
+          options.fixColumnsConfig?.[item.dataIndex]
+        if (currentFixColumnsConfig) {
+          obj[item.dataIndex] =
+            typeof currentFixColumnsConfig === 'function'
+              ? currentFixColumnsConfig(obj)
+              : currentFixColumnsConfig
+        }
+      })
+      // 更新时固定值不刷新
+      if (type === 'udpate') {
+        fixColumns.map((item) => {
+          obj[item.dataIndex] = resultList.value[index][item.dataIndex]
+        })
+      }
       return obj
     })
   }

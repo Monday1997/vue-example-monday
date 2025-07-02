@@ -11,8 +11,10 @@ export type MergeFormProps<T = any> = {
   getSelectOptionApi: () => Promise<T>
   formGroup: TFormGroupItem[]
   fixColumns?: ColumnProps[]
-  /** 按照自己的方式格式化返回值 设置selectOptions */
+  /** 格式化返回值 设置selectOptions */
   setSelectOptions?: (data: T) => TSelectConfig
-  /** 按照自己的方式格式化返回值 设置默认值 */
+  /** 格式化返回值 设置form默认值 */
   setInitForm?: (data: T) => TForm
+  /** 设置固定列的默认值 */
+  fixColumnsConfig?: Reocrd<string, any>
 }
