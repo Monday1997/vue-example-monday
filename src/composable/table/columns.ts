@@ -1,5 +1,5 @@
 import type { ColumnProps } from 'ant-design-vue/es/table'
-import type { anyObj, TForm, TFormGroupItem } from './type'
+import type { anyObj, TForm, TFormGroupItem, TColumnUPdateArg } from './type'
 /** 让frmGroup中有选中值的项组成列  */
 export function getDynamicColumn(
   formGroup: TFormGroupItem[],

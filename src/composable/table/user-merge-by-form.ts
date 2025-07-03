@@ -1,6 +1,5 @@
 import type { ColumnProps } from 'ant-design-vue/es/table'
 import type {
-  TFormGroupItem,
   TForm,
   MergeFormProps,
   TSelectConfig,
@@ -8,24 +7,23 @@ import type {
   anyObj,
 } from './type'
 import { getDynamicColumn, getGolumnFn } from './columns'
+import { getFixValueFn, generateForm, findDelValue } from './tool'
 export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
-  const { getSelectOptionApi, fixColumns = [], formGroup } = options
+  const {
+    getSelectOptionApi = () => Promise.resolve({}),
+    fixColumns = [],
+    formGroup = [],
+    fixColumnsConfig = {},
+  } = options
 
-  let dynamicColumn: ColumnProps[] = []
-  // 根据传入的formGroup生成表单
-  function generateForm() {
-    return formGroup.reduce((pre: TForm, cur: TFormGroupItem) => {
-      pre[cur.key] = []
-      return pre
-    }, {})
-  }
-
-  const form = reactive<TForm>(generateForm())
+  const form = reactive<TForm>(generateForm(formGroup))
   let oldForm = JSON.parse(JSON.stringify(form))
 
-  const resultColumns = ref<ColumnProps[]>([])
+  function getFixValue(record: anyObj) {
+    getFixValueFn(record, fixColumns!, fixColumnsConfig!)
+  }
+  let dynamicColumn: ColumnProps[] = []
   const resultList = ref<anyObj[]>([])
-
   // 缓存变化过的数据
   let cacheColsTableMap: Record<string, anyObj> = {}
   /**
@@ -71,7 +69,7 @@ export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
       getFixValue(obj)
       // 更新时固定值不刷新
       if (type === 'udpate') {
-        fixColumns.map((item) => {
+        fixColumns!.map((item) => {
           obj[item.dataIndex] = resultList.value[index][item.dataIndex]
         })
       }
@@ -79,21 +77,8 @@ export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
     })
   }
 
-  function getFixValue(record: anyObj) {
-    fixColumns.map((item) => {
-      record[item.dataIndex] = ''
-      const currentFixColumnsConfig = options.fixColumnsConfig?.[item.dataIndex]
-      if (currentFixColumnsConfig) {
-        record[item.dataIndex] =
-          typeof currentFixColumnsConfig === 'function'
-            ? currentFixColumnsConfig(record)
-            : currentFixColumnsConfig
-      }
-    })
-  }
-
   function getColumns() {
-    return getGolumnFn(dynamicColumn, resultList.value, fixColumns)
+    return getGolumnFn(dynamicColumn, resultList.value, fixColumns!)
   }
 
   function updateOldForms() {
@@ -127,20 +112,7 @@ export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
       index: dynamicIndex,
     }
   }
-  // list1长 list2短
-  function findDelValue<T extends string | number>(list1: T[], list2: T[]) {
-    let l = 0,
-      r = 0
-    while (l < list1.length && r < list2.length) {
-      if (list1[l] === list2[r]) {
-        l++
-        r++
-      } else {
-        return list1[l]
-      }
-    }
-    return list1[l]
-  }
+
   /**
    * 删除一行
    */
@@ -249,15 +221,13 @@ export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
       return { handlerType: 'update' }
     }
   }
+
+  const resultColumns = ref<ColumnProps[]>([])
   function updateColumns({
     handlerType,
     key: handlerKey,
     index: handlerIndex,
-  }: {
-    handlerType: 'addColumn' | 'delColumn' | 'ListUpdate' | 'update'
-    key?: string
-    index?: number
-  }) {
+  }: TColumnUPdateArg) {
     if (handlerType === 'addColumn' && typeof handlerIndex === 'number') {
       const customCell =
         handlerIndex > 0

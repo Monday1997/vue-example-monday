@@ -1,4 +1,5 @@
 import type { SelectProps } from 'ant-design-vue'
+import type { ColumnProps } from 'ant-design-vue/es/table'
 /** 更新列时的必要参数 */
 type TColumnUPdateArg = {
   handlerType: 'addColumn' | 'delColumn' | 'ListUpdate' | 'update'
@@ -23,7 +24,7 @@ export type MergeFormProps<T = any> = {
   /** 格式化返回值 设置form默认值 */
   setInitForm?: (data: T) => TForm
   /** 设置固定列的默认值 */
-  fixColumnsConfig?: Reocrd<string, any>
+  fixColumnsConfig?: Record<string, any>
 }
 
 export type anyObj = Record<string, any>
