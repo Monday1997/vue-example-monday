@@ -5,6 +5,7 @@ type TColumnUPdateArg = {
   key?: EItem
   index?: number
 }
+export type anyObj = Record<string, any>
 export type TFormGroupItem = {
   label: string
   key: string
@@ -24,3 +25,5 @@ export type MergeFormProps<T = any> = {
   /** 设置固定列的默认值 */
   fixColumnsConfig?: Reocrd<string, any>
 }
+
+export type anyObj = Record<string, any>

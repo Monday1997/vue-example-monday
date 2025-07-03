@@ -1,4 +1,3 @@
-export type TColumn = string | 'price' | 'price2'
 import type { ColumnProps } from 'ant-design-vue/es/table'
 import type {
   TFormGroupItem,
@@ -6,7 +5,9 @@ import type {
   MergeFormProps,
   TSelectConfig,
   TColumnUPdateArg,
+  anyObj,
 } from './type'
+import { getDynamicColumn, getGolumnFn } from './columns'
 export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
   const { getSelectOptionApi, fixColumns = [], formGroup } = options
 
@@ -23,14 +24,14 @@ export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
   let oldForm = JSON.parse(JSON.stringify(form))
 
   const resultColumns = ref<ColumnProps[]>([])
-  const resultList = ref<Record<string, unknown>[]>([])
+  const resultList = ref<anyObj[]>([])
 
   // 缓存变化过的数据
-  let cacheColsTableMap: Record<string, Record<string, unknown>> = {}
+  let cacheColsTableMap: Record<string, anyObj> = {}
   /**
    * 根据form生成表格数据
    */
-  function permuteForm(): Record<string, unknown>[] {
+  function permuteForm(): anyObj[] {
     if (dynamicColumn.length === 0) {
       return []
     }
@@ -78,7 +79,7 @@ export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
     })
   }
 
-  function getFixValue(record: Record<string, any>) {
+  function getFixValue(record: anyObj) {
     fixColumns.map((item) => {
       record[item.dataIndex] = ''
       const currentFixColumnsConfig = options.fixColumnsConfig?.[item.dataIndex]
@@ -90,85 +91,9 @@ export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
       }
     })
   }
-  function getDynamicColumn(): ColumnProps[] {
-    // return opitons.getColumnByForm()
-    return formGroup.reduce((pre: ColumnProps[], item) => {
-      if (form[item.key]!.length > 0) {
-        pre.push({
-          dataIndex: item.key,
-          title: item.label,
-        } as ColumnProps)
-      }
-      return pre
-    }, [])
-  }
+
   function getColumns() {
-    const columnSpans = getSpansColumn()
-    const columnConfig = calculateRowSpans(columnSpans)
-
-    const column = generateMergedColumns(columnConfig)
-
-    return column
-  }
-  //截取需要合并的项
-  function getSpansColumn(): TColumn[] {
-    const spans: TColumn[] = []
-    for (let i = 0; i < dynamicColumn.length; i++) {
-      const key = dynamicColumn[i].dataIndex
-      spans.push(key as TColumn)
-    }
-    return spans
-  }
-  // 计算每一列需要的rowsSpans
-  function calculateRowSpans(
-    columnSpans: TColumn[],
-  ): Record<TColumn, number[]> {
-    const rows = resultList.value
-    // 收集跨行映射
-    const spanConfig: Record<string, number[]> = {}
-    const spansData = new Array(rows.length).fill(0)
-    //遍历到当前列为止的行值
-    const columnValues: string[] = new Array(rows.length).fill('')
-    columnSpans.forEach((columnSpan) => {
-      const spans: number[] = [...spansData]
-      columnValues[0] += rows[0][columnSpan] + '_'
-      let currentSpanStart = 0
-      for (let i = 0; i < rows.length; i++) {
-        if (i < rows.length - 1) {
-          columnValues[i + 1] += rows[i + 1][columnSpan] + '_'
-        }
-        // 遇到不同组或最后一行时结算跨度
-        if (i === rows.length - 1 || columnValues[i + 1] !== columnValues[i]) {
-          spans[currentSpanStart] = i - currentSpanStart + 1
-          for (let j = currentSpanStart + 1; j <= i; j++) {
-            spans[j] = 0
-          }
-          currentSpanStart = i + 1
-        }
-      }
-      spanConfig[columnSpan] = spans
-    })
-    return spanConfig
-  }
-  /**
-   * 生成带合并配置的列定义
-   * @params columnConfig 合并行的列配置
-   */
-  function generateMergedColumns(
-    columnConfig: Record<TColumn, number[]>,
-  ): ColumnProps[] {
-    return dynamicColumn.concat(fixColumns).map((column) => {
-      if (!columnConfig[column.dataIndex as TColumn]) {
-        return column
-      }
-      return {
-        ...column,
-        dataIndex: `${column.dataIndex}_label`,
-        customCell: (_, index: number) => ({
-          rowSpan: columnConfig[column.dataIndex as TColumn][index],
-        }),
-      } as ColumnProps
-    })
+    return getGolumnFn(dynamicColumn, resultList.value, fixColumns)
   }
 
   function updateOldForms() {
@@ -354,14 +279,14 @@ export function userMergeByForm<T = any>(options: MergeFormProps<T>) {
   }
 
   function init() {
-    dynamicColumn = getDynamicColumn()
+    dynamicColumn = getDynamicColumn(formGroup, form)
     resultList.value = permuteForm()
     resultColumns.value = getColumns()
   }
   watch(
     () => form,
-    () => {
-      dynamicColumn = getDynamicColumn()
+    (val) => {
+      dynamicColumn = getDynamicColumn(formGroup, val)
       const handlerColumnArgs = updateList()
       if (handlerColumnArgs) {
         updateColumns(handlerColumnArgs)
