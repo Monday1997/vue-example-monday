@@ -1,4 +1,4 @@
-import type { TColumnProps, TColumn } from './data'
+import type { TColumn } from './data'
 import type { TableColumnType, SelectProps } from 'ant-design-vue'
 import { setCustomCell } from '@/utils/tools/static-table-merge'
 export enum EItem {
@@ -7,10 +7,12 @@ export enum EItem {
   attr2 = 'attr2',
   attr3 = 'attr3',
 }
-export const columns: TColumnProps = [
+
+export const columns: TableColumnType[] = [
   {
     title: '套餐',
     dataIndex: EItem.scheme,
+    key: EItem.scheme,
     width: 120,
   },
   {
@@ -39,7 +41,7 @@ export const columns: TColumnProps = [
     width: 120,
   },
 ]
-export const staticColumns: TColumnProps = [
+export const staticColumns: TableColumnType[] = [
   {
     title: '套餐',
     dataIndex: EItem.scheme,

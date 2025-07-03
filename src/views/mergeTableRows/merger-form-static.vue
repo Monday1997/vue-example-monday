@@ -10,5 +10,3 @@ import { list, staticColumns } from './config'
 import { EItem } from './config'
 addSpansValueInList([EItem.scheme, EItem.attr1, EItem.attr2, EItem.attr3], list)
 </script>
-
-<style scoped></style>

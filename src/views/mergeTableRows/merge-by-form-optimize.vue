@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import {
-  columnsWithForm as columns,
+  columnsWithForm as fixColumns,
   selectOptions,
   formGroup,
   spans,
@@ -64,7 +64,7 @@ const { loadSelectOption, resultColumns, resultList, form } = userMergeByForm({
   // 模拟从后端动态获取表单选项和表单默认值
   getSelectOptionApi,
   // 要渲染的列
-  fixColumns: columns,
+  fixColumns,
   // 固定值，可直接设置或通过函数返回值获取
   fixColumnsConfig: {
     price: (record: any) => {
